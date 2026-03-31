@@ -21,3 +21,7 @@ python create_cv_docx.py
 يمكنك فتح ملف `create_cv_docx.py` بأي محرر نصوص (مثل Notepad أو VS Code).
 ابحث داخله عن أية نصوص تود تعديلها (مثل قسم **BERUFSERFAHRUNG** أو **PROJEKTE**). قم بتعديل الكلام الموجود بين علامتي التنصيص `"انص هنا"`.
 احفظ تغييراتك (Ctrl+S) ثم أعد تشغيل السكربت بالخطوة السابقة وسيتم توليد السيرة الذاتية الجديدة تلقائياً!
+python create_cv_docx.py
+
+
+Bewerbung_Amjad_AwadAllah_Praktikum_2026.pdf
