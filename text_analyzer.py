@@ -1,196 +1,70 @@
-{
-  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
-  "basics": {
-    "name": "Amjad Awad-Allah",
-    "label": "Android-Entwickler | Fachinformatiker für Anwendungsentwicklung (in Ausbildung)",
-    "email": "amjad.awadallah93@gmail.com",
-    "phone": "+49 163 9055276",
-    "url": "https://amjadawadallah.com",
-    "summary": "Android-Entwickler mit syrischem Bachelor in KI. Aktuell Umschulung zum Fachinformatiker (IHK-Vorbereitung). Suche Pflichtpraktikum (11 Monate) ab 07/2026.",
-    "location": {
-      "city": "Essen",
-      "region": "Nordrhein-Westfalen",
-      "postalCode": "45307",
-      "address": "Großraum Gelsenkirchen"
-    },
-    "profiles": [
-      {
-        "network": "LinkedIn",
-        "username": "amjad-awad-allah",
-        "url": "https://linkedin.com/in/amjad-awad-allah"
-      },
-      {
-        "network": "GitHub",
-        "username": "amjad-awad-allah",
-        "url": "https://github.com/amjad-awad-allah"
-      }
-    ]
-  },
-  "work": [
-    {
-      "name": "Freiberufliche Web-Projekte",
-      "position": "Frontend/Backend-Entwicklung",
-      "location": "Remote",
-      "startDate": "2021-07",
-      "endDate": "2025-05",
-      "highlights": [
-        "Fliesen Demirel: TypeScript, Vue.js, Responsive Design, Animationen",
-        "Road Shield Solutions: PHP/Laravel Fullstack, MySQL, Deployment",
-        "Selbstständiges Einarbeiten in Vue.js, Laravel, TypeScript",
-        "SEO-Basics, Performance-Optimierung, Mobile-First"
-      ]
-    },
-    {
-      "name": "NVS-SOFT",
-      "position": "Android-Entwickler",
-      "location": "Dubai, VAE",
-      "startDate": "2018-01",
-      "endDate": "2021-09",
-      "highlights": [
-        "Tarasol & Arcmate 9: Enterprise-Apps mit Offline-Sync, Routing, Signatur",
-        "Multithreading für Performance bei großen Datenmengen",
-        "PDF-Verarbeitung: Signatur, Stempel, Verschlüsselung",
-        "Barcode-Scanning, Push-Benachrichtigungen, Retrofit-API-Integration"
-      ]
-    },
-    {
-      "name": "SmartAngle",
-      "position": "Android-Entwickler (Remote, Teilzeit)",
-      "location": "Irak",
-      "startDate": "2020-05",
-      "endDate": "2021-03",
-      "highlights": [
-        "E-Learning & Social-Apps mit internationalen Teams",
-        "Anforderungsanalyse und Feature-Implementierung",
-        "Agile Abstimmung mit Kunden und Entwicklerteams"
-      ]
-    },
-    {
-      "name": "PRO-Tech Group",
-      "position": "Software-Entwickler",
-      "location": "Syrien",
-      "startDate": "2017-02",
-      "endDate": "2018-06",
-      "highlights": [
-        "Mobile & IPTV-Lösungen mit Streaming-Protokollen",
-        "Technische Dokumentation und Code-Standards",
-        "Fokus auf Stabilität und Wartbarkeit"
-      ]
-    }
-  ],
-  "education": [
-    {
-      "institution": "BFZ Essen",
-      "area": "Fachinformatiker für Anwendungsentwicklung",
-      "studyType": "Umschulung (IHK-Vorbereitung)",
-      "startDate": "2025",
-      "endDate": "heute",
-      "notes": "IHK-Prüfung noch ausstehend. Pflichtpraktikum (11 Monate) ab 07/2026."
-    },
-    {
-      "institution": "Arab International University (AIU)",
-      "area": "Informatik – Schwerpunkt Künstliche Intelligenz",
-      "studyType": "Bachelor of Science (B.Sc.)",
-      "location": "Damaskus, Syrien",
-      "startDate": "2012",
-      "endDate": "2017",
-      "notes": "Abgeschlossen."
-    }
-  ],
-  "skills": [
-    {
-      "name": "Android",
-      "keywords": [
-        "Java", "Kotlin", "Android SDK", "MVVM/MVP", "Multithreading",
-        "SQLite/Room", "PDF (Signatur/Verschlüsselung)", "Barcode", "FCM", "Retrofit"
-      ]
-    },
-    {
-      "name": "Web",
-      "keywords": [
-        "TypeScript", "Vue.js", "PHP", "Laravel", "HTML5/CSS3", "Responsive Design", "SEO"
-      ]
-    },
-    {
-      "name": "Backend & Tools",
-      "keywords": [
-        "REST API", "SQL", "Git/GitLab", "Scrum", "Spring Boot (in Ausbildung)", "C# (in Ausbildung)"
-      ]
-    }
-  ],
-  "projects": [
-    {
-      "name": "Tarasol Suite – Enterprise Correspondence",
-      "description": "Mobile Client für Dokumentenmanagement mit Offline-Sync.",
-      "highlights": [
-        "Push-Notifications für eingehende Korrespondenz",
-        "On-Screen-Signatur mit PIN-Verifizierung",
-        "Offline-Bearbeitung mit automatischer Synchronisation",
-        "Vollverschlüsselung, Task-Management, Document-Routing",
-        "Interne Mail-Inbox mit Reply/Forward-Funktion"
-      ],
-      "keywords": ["Java", "Kotlin", "SQLite", "MVVM", "Encryption", "Multithreading", "PDF", "Barcode"],
-      "startDate": "2022",
-      "url": "https://play.google.com/store/apps/details?id=com.nvssoft.tarasolsuite"
-    },
-    {
-      "name": "Arcmate 9 – Document Repository Client",
-      "description": "Mobiler Zugriff auf Enterprise-Repositories.",
-      "highlights": [
-        "Schnelles Retrieval mit erweiterter Suche",
-        "Server-side Renditions (Zoom/Rotate/Share ohne Viewer-App)",
-        "Offline-Modus mit Auto-Sync",
-        "Document-Routing und interne Mail-Funktion",
-        "End-to-End-Verschlüsselung"
-      ],
-      "keywords": ["Java", "Android SDK", "REST API", "OAuth2", "Offline-Sync", "Encryption"],
-      "startDate": "2021",
-      "url": "https://play.google.com/store/apps/details?id=com.nvssoft.arcmate9"
-    },
-    {
-      "name": "Fliesen Demirel – Unternehmenswebsite",
-      "description": "Responsive Website mit TypeScript/Vue.js.",
-      "highlights": [
-        "Vue.js Single-File Components, Animationen",
-        "Mobile-First, 100% responsive",
-        "Performance-Optimierung: Lazy Loading, Code Splitting",
-        "Status: In Entwicklung"
-      ],
-      "keywords": ["TypeScript", "Vue.js", "HTML5", "CSS3", "Responsive Design"],
-      "startDate": "2025",
-      "url": "https://fliesen-demirel.de/"
-    },
-    {
-      "name": "Road Shield Solutions – Firmenwebsite",
-      "description": "Fullstack-Entwicklung mit PHP/Laravel.",
-      "highlights": [
-        "Laravel Backend: RESTful API, Auth, MySQL",
-        "Blade-Templates, responsives Frontend",
-        "Content-Management-Struktur für Kunden",
-        "Alleinige Umsetzung: Konzept bis Deployment"
-      ],
-      "keywords": ["PHP", "Laravel", "MySQL", "HTML", "CSS", "JavaScript"],
-      "startDate": "2026",
-      "url": "https://www.roadshield.ae/"
-    }
-  ],
-  "certificates": [
-    { "name": "Cybersecurity Analyst", "issuer": "Cisco Networking Academy", "date": "2025" },
-    { "name": "Python Basics", "issuer": "Cisco Networking Academy", "date": "2025" },
-    { "name": "JavaScript Basics", "issuer": "Cisco Networking Academy", "date": "2025" },
-    { "name": "Deutsch B2", "issuer": "Weststadt Akademie", "date": "2025" },
-    { "name": "Deutsch B1", "issuer": "DÜS Eckert", "date": "2024" },
-    { "name": "Jobcoaching & Bewerbungstraining", "issuer": "Weststadt Akademie", "date": "2024-2025" }
-  ],
-  "languages": [
-    { "language": "Arabisch", "fluency": "Muttersprache" },
-    { "language": "Deutsch", "fluency": "B2 – Fortgeschritten" },
-    { "language": "Englisch", "fluency": "Fortgeschritten – Berufssprache" },
-    { "language": "Französisch", "fluency": "Grundkenntnisse" }
-  ],
-  "meta": {
-    "version": "1.0",
-    "lastModified": "2026-04-01",
-    "keywords": ["Android", "Kotlin", "Java", "Vue.js", "Laravel", "TypeScript", "REST-API", "Fachinformatiker", "Pflichtpraktikum"]
-  }
-}
+import os
+import json
+import google.generativeai as genai
+from typing import Optional
+
+def analyze_cv_text(text: str, api_key: str) -> Optional[dict]:
+    """
+    Verwendet die Gemini API, um CV-Daten aus Rohtext in das JSON-Resume-Format zu extrahieren.
+    """
+    genai.configure(api_key=api_key)
+    
+    # Modell konfigurieren
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    
+    prompt = f"""
+Du bist ein Experte für die Extraktion von Daten aus Lebensläufen (CV Parser). 
+Deine Aufgabe ist es, den unten stehenden Text zu lesen und in ein präzises JSON-Format umzuwandeln, das der (JSON Resume Schema) Struktur entspricht.
+
+Regeln:
+1. Extrahiere persönliche Informationen, Berufserfahrung, Ausbildung, Fähigkeiten, Projekte, Sprachen und Zertifikate.
+2. Wenn du Links findest (LinkedIn, GitHub, Webseite), setze sie an die richtige Stelle.
+3. Behalte die Sprache des Textes bei (wenn der Text auf Deutsch ist, extrahiere die Daten auf Deutsch).
+4. Antworte **NUR** mit validem JSON-Code, ohne zusätzlichen Text oder Einleitungen.
+5. Erforderliche Struktur:
+   - basics: {{ name, email, phone, url, summary, location, profiles: [{{ network, url }}] }}
+   - work: [{{ name, position, startDate, endDate, highlights: [] }}]
+   - education: [{{ institution, area, studyType, startDate, endDate, courses: [], notes }}]
+   - skills: [{{ name, keywords: [] }}]
+   - projects: [{{ name, description, highlights: [], keywords: [], url }}]
+   - certificates: [{{ name, issuer, date }}]
+   - languages: [{{ language, fluency }}]
+
+Zu analysierender Text:
+---
+{text}
+---
+"""
+
+    try:
+        response = model.generate_content(prompt)
+        content = response.text.strip()
+        if content.startswith("```json"):
+            content = content[7:-3].strip()
+        elif content.startswith("```"):
+            content = content[3:-3].strip()
+            
+        data = json.loads(content)
+        return data
+    except Exception as e:
+        print(f"Fehler bei der KI-Analyse: {e}")
+        return None
+
+if __name__ == "__main__":
+    # Test-Block
+    KEY = os.environ.get("GEMINI_API_KEY")
+    if not KEY:
+        print("Bitte setzen Sie die Umgebungsvariable GEMINI_API_KEY.")
+    else:
+        if os.path.exists("raw_cv.txt"):
+            with open("raw_cv.txt", "r", encoding="utf-8") as f:
+                raw_text = f.read()
+            
+            print("Analysiere Text...")
+            result = analyze_cv_text(raw_text, KEY)
+            if result:
+                with open("data_new.json", "w", encoding="utf-8") as f:
+                    json.dump(result, f, indent=2, ensure_ascii=False)
+                print("Daten erfolgreich nach data_new.json extrahiert.")
+        else:
+            print("raw_cv.txt nicht gefunden.")

@@ -1,30 +1,51 @@
-# Python CV Generator 🚀
+# KI-Lebenslauf-Generator (AI CV Generator) 🚀
 
-An elegant, open-source Python tool that dynamically generates a perfectly formatted `.docx` CV (Lebenslauf) based on a structured JSON configuration. This project is ideal for developers who want version control over their CV and a clean, scriptable generation pipeline.
+Ein professionelles Python-Tool zur automatischen Erstellung perfekt formatierter Lebensläufe im `.docx`-Format. Das Tool kann entweder strukturierte JSON-Daten verwenden oder mittels KI (Google Gemini) unstrukturierten Rohtext direkt in einen formatierten Lebenslauf umwandeln.
 
-## 📌 Features
-- **Strict Data/Logic Separation:** Uses standard JSON (`data.json`) to store personal details.
-- **Top-tier Formatting:** Automatically implements standard professional formats (e.g. Right-Aligned tabs for dates natively in Word).
-- **Extensible:** Easily modify the python code to change font colors, borders, and layouts.
+## 📌 Funktionen
+- **KI-Textanalyse:** Wandelt ungeordneten Text (z. B. aus LinkedIn-Profilen oder alten Dokumenten) automatisch in ein strukturiertes JSON-Format um.
+- **Professionelle Formatierung:** Automatische Erstellung von Word-Dokumenten mit präziser Ausrichtung, anklickbaren Hyperlinks und sauberer Typografie (Calibri).
+- **A4-Standard:** Optimiert für das europäische A4-Format mit korrekter Paginierung und Umbruchschutz für Absätze.
+- **Datentrennung:** Klare Trennung zwischen Inhalten (`data.json`) und Design (`cv_generator.py`).
 
 ## ⚙️ Installation
-Clone the repository and install the dependencies:
+Klonen Sie das Repository und installieren Sie die Abhängigkeiten:
 ```bash
-git clone https://github.com/your-username/python-cv-generator.git
-cd python-cv-generator
+git clone https://github.com/amjad-awad-allah/cvscript.git
+cd cvscript
 pip install -r requirements.txt
 ```
 
-## 🚀 Usage 
-1. Open `data.json` and insert your own experience, education, skills, and projects.
-2. Run the generator script:
-```bash
-python cv_generator.py
-```
-3. A properly formatted `Generated_CV.docx` file will immediately appear in your root directory!
+## 🚀 Nutzung
 
-## 🧩 Contributing
-Contributions, issues, and feature requests are welcome! Feel free to modify the `cv_generator.py` file to add more CV styles or output formats like PDF.
+### 1. Verwendung des KI-Generators (Empfohlen)
+Dieses Skript führt Sie durch den gesamten Prozess von der Textanalyse bis zur Word-Datei:
 
-## 📄 License
+1. Erstellen Sie eine Datei namens `.env` im Hauptverzeichnis.
+2. Fügen Sie Ihren Google Gemini API-Key hinzu:
+   ```text
+   GEMINI_API_KEY=Ihr_API_Key_Hier
+   ```
+3. Kopieren Sie Ihren Lebenslauf-Rohtext in die Datei `raw_cv.txt`.
+4. Starten Sie den Prozess:
+   ```bash
+   python main.py
+   ```
+
+### 2. Manuelle Generierung aus JSON
+Falls Sie die Daten bereits im JSON-Format vorliegen haben:
+1. Bearbeiten Sie die Datei `data.json` nach Ihren Wünschen.
+2. Starten Sie die Generierung:
+   ```bash
+   python cv_generator.py
+   ```
+
+## 🧩 Projektstruktur
+- `main.py`: Zentrales Skript für den Workflow (Text -> KI -> JSON -> Word).
+- `text_analyzer.py`: Modul zur KI-gestützten Analyse mittels Gemini API.
+- `cv_generator.py`: Modul zur Erstellung der Word-Datei (`.docx`).
+- `data.json`: Die strukturierte Datenquelle im JSON-Resume-Format.
+- `raw_cv.txt`: Eingabedatei für unstrukturierten Rohtext.
+
+## 📄 Lizenz
 MIT License
