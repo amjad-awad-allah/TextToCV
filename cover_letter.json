@@ -1,0 +1,19 @@
+{
+  "recipient": {
+    "company": "Beispiel GmbH",
+    "contact_person": "Herr Max Mustermann",
+    "address": "Musterstraße 123",
+    "postal_code": "12345",
+    "city": "Musterstadt"
+  },
+  "subject": "Bewerbung als Android-Entwickler / Pflichtpraktikum",
+  "salutation": "Sehr geehrter Herr Mustermann,",
+  "paragraphs": [
+    "mit großem Interesse habe ich Ihre Stellenausschreibung auf Ihrer Webseite gelesen. Da ich über mehrjährige Erfahrung in der Android-Entwicklung verfüge und mich aktuell in einer Umschulung zum Fachinformatiker für Anwendungsentwicklung befinde, bin ich davon überzeugt, eine wertvolle Unterstützung für Ihr Team zu sein.",
+    "In meinen bisherigen Projekten bei NVS-SOFT in Dubai konnte ich fundierte Kenntnisse in Java und Kotlin sowie in der Arbeit mit REST-APIs und Offline-Synchronisation sammeln. Besonders reizt mich an der Arbeit bei der Beispiel GmbH die innovative Herangehensweise an moderne Softwarelösungen.",
+    "Ich freue mich über die Gelegenheit, mich Ihnen in einem persönlichen Gespräch vorzustellen.",
+    "Für Rückfragen stehe ich Ihnen jederzeit gerne telefonisch oder per E-Mail zur Verfügung."
+  ],
+  "closing": "Mit freundlichen Grüßen",
+  "location": "Essen"
+}

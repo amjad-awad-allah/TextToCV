@@ -48,8 +48,17 @@ def main():
         return
 
     # 4. DOCX generieren
-    print("--- [ Schritt 2: Generierung der Word-Datei ] ---")
+    print("--- [ Schritt 2: Generierung der Lebenslauf-Word-Datei ] ---")
     cv_generator.generate_cv(json_file, output_docx)
+
+    # 5. Optional: Anschreiben generieren
+    print("\n--- [ Schritt 3: Anschreiben (Cover Letter) ] ---")
+    confirm_cl = input("Möchten Sie auch das Anschreiben (Cover Letter) generieren? (j/n): ")
+    if confirm_cl.lower() == 'j':
+        import cover_letter_generator
+        cover_letter_generator.generate_cover_letter(json_file, "cover_letter.json", "Anschreiben.docx")
+    else:
+        print("Anschreiben wurde übersprungen.")
 
 if __name__ == "__main__":
     main()

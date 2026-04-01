@@ -40,6 +40,12 @@ Falls Sie die Daten bereits im JSON-Format vorliegen haben:
    python cv_generator.py
    ```
 
+### 3. Generierung des Anschreibens (Cover Letter)
+Sie können nun auch ein professionelles Anschreiben im gleichen Stil erstellen:
+- Bearbeiten Sie die `cover_letter.json` mit den Empfängerdaten und Textabsätzen.
+- Der Generator übernimmt Ihre persönlichen Daten (Name, Adresse, Kontakt) automatisch aus der `data.json`.
+- Führen Sie einfach die `main.py` aus und wählen Sie am Ende "j", um das Anschreiben zu generieren.
+
 ## 🧩 Projektstruktur
 - `main.py`: Zentrales Skript für den Workflow (Text -> KI -> JSON -> Word).
 - `text_analyzer.py`: Modul zur KI-gestützten Analyse mittels Gemini API.
