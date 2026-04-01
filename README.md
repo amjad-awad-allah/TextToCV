@@ -1,27 +1,30 @@
-# 📝 دليل إنشاء السيرة الذاتية (CV Generator)
+# Python CV Generator 🚀
 
-يحتوي هذا المجلد على كود بلغة `Python` يقوم أوتوماتيكياً بإنشاء وتنسيق سيرتك الذاتية في ملف `Word` حقيقي، وبشكل احترافي ومطابق للمعايير الألمانية.
+An elegant, open-source Python tool that dynamically generates a perfectly formatted `.docx` CV (Lebenslauf) based on a structured JSON configuration. This project is ideal for developers who want version control over their CV and a clean, scriptable generation pipeline.
 
-## ⚙️ المتطلبات (Requirements)
-للتشغيل، ستحتاج فقط لمكتبة واحدة تدعى `python-docx` (وقد تم تثبيتها بالفعل مسبقاً، ولكن في حال نقلت الملفات لجهاز جديد):
+## 📌 Features
+- **Strict Data/Logic Separation:** Uses standard JSON (`data.json`) to store personal details.
+- **Top-tier Formatting:** Automatically implements standard professional formats (e.g. Right-Aligned tabs for dates natively in Word).
+- **Extensible:** Easily modify the python code to change font colors, borders, and layouts.
+
+## ⚙️ Installation
+Clone the repository and install the dependencies:
 ```bash
-pip install python-docx
+git clone https://github.com/your-username/python-cv-generator.git
+cd python-cv-generator
+pip install -r requirements.txt
 ```
 
-## 🚀 طريقة التشغيل (Usage)
-لإنتاج أي نسخة جديدة من السيرة الذاتية، قم بالتالي:
-1. افتح سطر الأوامر `powershell` أو `cmd` في نفس هذا المجلد.
-2. اكتب الأمر التالي وشغله:
+## 🚀 Usage 
+1. Open `data.json` and insert your own experience, education, skills, and projects.
+2. Run the generator script:
 ```bash
-python create_cv_docx.py
+python cv_generator.py
 ```
-3. ستلاحظ ظهور ملف `Word` جديد باسم (Amjad_Awad_CV_Professional.docx) جاهز للفتح أو الطباعة كـ `PDF`.
+3. A properly formatted `Generated_CV.docx` file will immediately appear in your root directory!
 
-## ✏️ للتبديل وتعديل المحتوى (Editing Content)
-يمكنك فتح ملف `create_cv_docx.py` بأي محرر نصوص (مثل Notepad أو VS Code).
-ابحث داخله عن أية نصوص تود تعديلها (مثل قسم **BERUFSERFAHRUNG** أو **PROJEKTE**). قم بتعديل الكلام الموجود بين علامتي التنصيص `"انص هنا"`.
-احفظ تغييراتك (Ctrl+S) ثم أعد تشغيل السكربت بالخطوة السابقة وسيتم توليد السيرة الذاتية الجديدة تلقائياً!
-python create_cv_docx.py
+## 🧩 Contributing
+Contributions, issues, and feature requests are welcome! Feel free to modify the `cv_generator.py` file to add more CV styles or output formats like PDF.
 
-
-Bewerbung_Amjad_AwadAllah_Praktikum_2026.pdf
+## 📄 License
+MIT License
