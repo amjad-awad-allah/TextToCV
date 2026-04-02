@@ -1,19 +1,27 @@
 {
-  "recipient": {
-    "company": "Beispiel GmbH",
-    "contact_person": "Herr Max Mustermann",
-    "address": "Musterstraße 123",
-    "postal_code": "12345",
-    "city": "Musterstadt"
+  "sender": {
+    "name": "Amjad Awad-Allah",
+    "location": "Großraum Gelsenkirchen, Essen, Nordrhein-Westfalen",
+    "phone": "+49 163 9055276",
+    "email": "amjad.awadallah93@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/amjad-awad-allah"
   },
-  "subject": "Bewerbung als Android-Entwickler / Pflichtpraktikum",
-  "salutation": "Sehr geehrter Herr Mustermann,",
+  "recipient": {
+    "company": "REMS Messtechnik GmbH & Co KG",
+    "contact_person": "Frau Sandra Reichle",
+    "postal_code": "58093",
+    "city": "Hagen"
+  },
+  "date": "Essen, den [Datum einfügen]",
+  "subject": "Bewerbung um ein Pflichtpraktikum im Bereich Softwareentwicklung",
+  "reference": "Referenz: Studentenjob Praktikant oder Werkstudent Software-Entwicklung (m/w/d)",
+  "salutation": "Sehr geehrte Frau Reichle,",
   "paragraphs": [
-    "mit großem Interesse habe ich Ihre Stellenausschreibung auf Ihrer Webseite gelesen. Da ich über mehrjährige Erfahrung in der Android-Entwicklung verfüge und mich aktuell in einer Umschulung zum Fachinformatiker für Anwendungsentwicklung befinde, bin ich davon überzeugt, eine wertvolle Unterstützung für Ihr Team zu sein.",
-    "In meinen bisherigen Projekten bei NVS-SOFT in Dubai konnte ich fundierte Kenntnisse in Java und Kotlin sowie in der Arbeit mit REST-APIs und Offline-Synchronisation sammeln. Besonders reizt mich an der Arbeit bei der Beispiel GmbH die innovative Herangehensweise an moderne Softwarelösungen.",
-    "Ich freue mich über die Gelegenheit, mich Ihnen in einem persönlichen Gespräch vorzustellen.",
-    "Für Rückfragen stehe ich Ihnen jederzeit gerne telefonisch oder per E-Mail zur Verfügung."
+    "die Verbindung von präziser Messtechnik und innovativer Softwareentwicklung bei REMS begeistert mich. Im Rahmen meiner Umschulung zum Fachinformatiker für Anwendungsentwicklung (BFZ Essen, IHK-Zertifizierung) suche ich ein 11-monatiges Pflichtpraktikum ab Juli 2026. Gerne möchte ich diese Zeit nutzen, um meine bisherigen Kenntnisse in Ihrem professionellen Umfeld einzubringen und mich speziell im Bereich hardwarenaher Programmierung weiterzuentwickeln.",
+    "Durch meine mehrjährige Berufserfahrung in der Android- und Webentwicklung bringe ich ein fundiertes Verständnis für saubere Code-Strukturen, Versionskontrolle mit Git und agile Arbeitsweisen mit. Ich bin es gewohnt, mich schnell in neue Codebases einzuarbeiten und verantwortungsvoll Aufgaben zu übernehmen. Gleichzeitig sehe ich das Praktikum als ideale Möglichkeit, mich fachlich weiterzuentwickeln und von der Erfahrung Ihres Teams zu lernen.",
+    "Besonders reizt mich an der Stelle die Möglichkeit, Kenntnisse in C/C++ und Embedded-Systemen (wie ESP32) praktisch zu vertiefen. Meine akademischen Grundlagen aus dem Informatikstudium möchte ich nun gezielt in der Praxis anwenden und mich durch Ihre Erfahrung und Arbeitsweise weiterzuentwickeln. Ich bin überzeugt, dass ich durch meine Vorerfahrung schnell produktiv werden und Ihr Team effektiv entlasten kann.",
+    "Gerne stehe ich Ihnen ab Juli 2026 für die Dauer von 11 Monaten in Vollzeit zur Verfügung. Über eine Einladung zu einem persönlichen Gespräch freue ich mich sehr."
   ],
   "closing": "Mit freundlichen Grüßen",
-  "location": "Essen"
+  "signature": "Amjad Awad-Allah"
 }
