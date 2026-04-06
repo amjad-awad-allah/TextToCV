@@ -1,57 +1,62 @@
-# KI-Lebenslauf-Generator (AI CV Generator) 🚀
+# AI CV & Cover Letter Generator 🚀
 
-Ein professionelles Python-Tool zur automatischen Erstellung perfekt formatierter Lebensläufe im `.docx`-Format. Das Tool kann entweder strukturierte JSON-Daten verwenden oder mittels KI (Google Gemini) unstrukturierten Rohtext direkt in einen formatierten Lebenslauf umwandeln.
+A professional Python-based tool that uses Artificial Intelligence to automatically generate perfectly formatted, **ATS-friendly** CVs and Cover Letters in `.docx` format.
 
-## 📌 Funktionen
-- **KI-Textanalyse:** Wandelt ungeordneten Text (z. B. aus LinkedIn-Profilen oder alten Dokumenten) automatisch in ein strukturiertes JSON-Format um.
-- **Professionelle Formatierung:** Automatische Erstellung von Word-Dokumenten mit präziser Ausrichtung, anklickbaren Hyperlinks und sauberer Typografie (Calibri).
-- **A4-Standard:** Optimiert für das europäische A4-Format mit korrekter Paginierung und Umbruchschutz für Absätze.
-- **Datentrennung:** Klare Trennung zwischen Inhalten (`data.json`) und Design (`cv_generator.py`).
+You can input unstructured raw text (e.g., from an old CV or a LinkedIn profile), and the tool will structure it, match it against a job description, and output beautifully formatted Word documents that meet professional standards (including German DIN 5008).
+
+## 🌟 Key Features
+- **Modern Web UI**: A clean, intuitive graphical interface powered by `Streamlit`.
+- **Multi-AI Support**: Automatically chooses between **OpenAI (e.g., GPT-4o-mini)** and **Google Gemini** based on the API key you provide.
+- **ATS-Optimized Formatting**: Generates `.docx` files without complex tables or text boxes, ensuring 100% readability by Applicant Tracking Systems (ATS).
+- **Smart Cover Letters**: Analyzes your CV alongside a given Job Description to generate a tailored, high-impact Cover Letter.
+- **CV Rating & HR Feedback**: Instantly rate your raw CV text using AI and get constructive HR-style feedback and a score out of 10.
+- **Smart File Management**: Automatically saves all generated files in an `output/` directory with unique timestamped filenames (e.g., `Lebenslauf_20260406_1702.docx`) to prevent overwrites.
+- **Direct Word Integration**: One-click button to automatically open the generated `.docx` file in Microsoft Word straight from your browser.
+- **DIN 5008 Compliant**: Margins and spacings are optimized for German corporate standards while keeping the documents concise to avoid exceeding page limits.
 
 ## ⚙️ Installation
-Klonen Sie das Repository und installieren Sie die Abhängigkeiten:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/amjad-awad-allah/cvscript.git
+   cd cvscript
+   ```
+2. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+   *(This will install everything you need, including `streamlit`, `openai`, `google-generativeai`, and `python-docx`)*
+
+## 🚀 Usage
+
+### 1. Starting the Application
+The easiest way to use the generator is through its modern web interface. Start it by running:
 ```bash
-git clone https://github.com/amjad-awad-allah/cvscript.git
-cd cvscript
-pip install -r requirements.txt
+python -m streamlit run app.py
 ```
+*(This will automatically open the application in your default web browser).*
 
-## 🚀 Nutzung
+### 2. Generating a CV
+1. Enter your API Key (OpenAI or Gemini) in the sidebar.
+2. Paste your raw, unstructured CV text into the provided text area.
+3. (Optional) Click **"⭐ Rohtext Bewerten"** to get a quick AI review and rating of your CV text before proceeding.
+4. Click **"🚀 CV Daten Extrahieren"** (Extract CV Data). The AI will structure your text automatically.
+5. Click **"📄 Word-Lebenslauf (.docx) Generieren"** to create your ATS-friendly CV.
+6. Download the file, or click **"📂 Lebenslauf in Word öffnen (Windows)"** to open it immediately.
 
-### 1. Verwendung des KI-Generators (Empfohlen)
-Dieses Skript führt Sie durch den gesamten Prozess von der Textanalyse bis zur Word-Datei:
+### 3. Generating a Cover Letter
+1. After extracting your CV data, paste the target **Job Description** in the Cover Letter section.
+2. Click **"✉️ AI Anschreiben-Daten generieren"** to have the AI write a highly targeted cover letter.
+3. Click **"📝 Anschreiben-Word (.docx) Generieren"** to securely generate the final cover letter document.
+4. Open the downloaded file or click to open directly in Word.
 
-1. Erstellen Sie eine Datei namens `.env` im Hauptverzeichnis.
-2. Fügen Sie Ihren Google Gemini API-Key hinzu:
-   ```text
-   GEMINI_API_KEY=Ihr_API_Key_Hier
-   ```
-3. Kopieren Sie Ihren Lebenslauf-Rohtext in die Datei `raw_cv.txt`.
-4. Starten Sie den Prozess:
-   ```bash
-   python main.py
-   ```
+## 🧩 Project Structure
+- `app.py`: The main Streamlit Web Application module.
+- `text_analyzer.py`: The AI integration module handling API calls for parsing, rating, and generating cover letters.
+- `cv_generator.py`: Converts structured JSON data into an ATS-friendly `.docx` CV.
+- `cover_letter_generator.py`: Converts JSON data into a properly formatted `.docx` Cover Letter.
+- `output/`: Folder containing your timestamped generated `.docx` files.
+- `data.json` & `cover_letter.json`: The intermediate structured data files generated by the AI integrations.
 
-### 2. Manuelle Generierung aus JSON
-Falls Sie die Daten bereits im JSON-Format vorliegen haben:
-1. Bearbeiten Sie die Datei `data.json` nach Ihren Wünschen.
-2. Starten Sie die Generierung:
-   ```bash
-   python cv_generator.py
-   ```
-
-### 3. Generierung des Anschreibens (Cover Letter)
-Sie können nun auch ein professionelles Anschreiben im gleichen Stil erstellen:
-- Bearbeiten Sie die `cover_letter.json` mit den Empfängerdaten und Textabsätzen.
-- Der Generator übernimmt Ihre persönlichen Daten (Name, Adresse, Kontakt) automatisch aus der `data.json`.
-- Führen Sie einfach die `main.py` aus und wählen Sie am Ende "j", um das Anschreiben zu generieren.
-
-## 🧩 Projektstruktur
-- `main.py`: Zentrales Skript für den Workflow (Text -> KI -> JSON -> Word).
-- `text_analyzer.py`: Modul zur KI-gestützten Analyse mittels Gemini API.
-- `cv_generator.py`: Modul zur Erstellung der Word-Datei (`.docx`).
-- `data.json`: Die strukturierte Datenquelle im JSON-Resume-Format.
-- `raw_cv.txt`: Eingabedatei für unstrukturierten Rohtext.
-
-## 📄 Lizenz
+## 📄 License
 MIT License

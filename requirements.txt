@@ -1,3 +1,5 @@
 python-docx>=1.1.0
 google-generativeai
 python-dotenv
+openai
+streamlit

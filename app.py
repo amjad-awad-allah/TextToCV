@@ -1,0 +1,322 @@
+import streamlit as st
+import os
+import json
+import time
+import text_analyzer
+import cv_generator
+import cover_letter_generator
+import combined_generator
+from dotenv import load_dotenv
+
+load_dotenv()
+
+st.set_page_config(page_title="AI CV & Cover Letter Generator", page_icon="📄", layout="wide")
+os.makedirs("output", exist_ok=True)
+
+st.title("📄 AI CV & Cover Letter Generator")
+st.markdown("Generate professional, ATS-friendly CVs and Cover Letters using Artificial Intelligence.")
+
+# --- SIDEBAR ---
+st.sidebar.header("⚙️ Settings")
+api_provider = st.sidebar.radio("Select AI Provider:", ["OpenAI", "Google Gemini"])
+
+api_key = ""
+if api_provider == "OpenAI":
+    api_key = st.sidebar.text_input("OpenAI API Key (sk-...):", type="password", value=os.environ.get("OPENAI_API_KEY", ""))
+else:
+    api_key = st.sidebar.text_input("Gemini API Key:", type="password", value=os.environ.get("GEMINI_API_KEY", ""))
+
+# Load existing JSON if available into session state so we don't lose it
+if 'cv_data' not in st.session_state and os.path.exists("data.json"):
+    try:
+        with open("data.json", "r", encoding="utf-8") as f:
+            st.session_state['cv_data'] = json.load(f)
+    except:
+        pass
+
+if 'cl_data' not in st.session_state and os.path.exists("cover_letter.json"):
+     try:
+         with open("cover_letter.json", "r", encoding="utf-8") as f:
+             st.session_state['cl_data'] = json.load(f)
+     except:
+         pass
+
+# --- TABS ---
+tab1, tab2, tab3, tab4 = st.tabs([
+    "🔍 1. Extraction", 
+    "✍️ 2. CV Editor", 
+    "✉️ 3. Cover Letter", 
+    "💾 4. Export & Download"
+])
+
+# --- TAB 1: EXTRACTION ---
+with tab1:
+    st.header("Extract Data from Raw Text")
+    col1, col2 = st.columns([1.5, 1])
+    with col1:
+        raw_cv_text = st.text_area("Paste your unstructured CV or LinkedIn profile here:", height=300)
+    with col2:
+        st.info("💡 **Tip:** You can paste mixed experiences from various documents. The AI will format everything automatically.")
+        
+        if st.button("🚀 Extract CV Data", use_container_width=True):
+            if not api_key:
+                st.error("Please enter an API Key in the sidebar.")
+            elif not raw_cv_text.strip():
+                st.error("Please insert raw text to extract.")
+            else:
+                with st.spinner(f"Extracting structured data using {api_provider}..."):
+                    provider = 'openai' if api_provider == "OpenAI" else 'gemini'
+                    extracted_data = text_analyzer.analyze_cv_text(raw_cv_text, api_key, provider=provider)
+                    
+                    if extracted_data:
+                        st.success("Data successfully extracted! Go to Tab 2 to review and edit.")
+                        st.session_state['cv_data'] = extracted_data
+                        with open("data.json", "w", encoding="utf-8") as f:
+                            json.dump(extracted_data, f, indent=2, ensure_ascii=False)
+                    else:
+                        st.error("Error during extraction. Please verify your API Key.")
+
+        if st.button("⭐ AI Profile Evaluation (HR-Feedback)", use_container_width=True):
+            if not api_key:
+                st.error("Please enter an API Key in the sidebar.")
+            elif not raw_cv_text.strip():
+                st.error("Please insert raw text to evaluate.")
+            else:
+                 with st.spinner("Generating expert feedback..."):
+                    provider = 'openai' if api_provider == "OpenAI" else 'gemini'
+                    rating = text_analyzer.rate_cv(raw_cv_text, api_key, provider=provider)
+                    st.info(rating)
+
+
+# --- TAB 2: EDITOR ---
+with tab2:
+    st.header("Interactive CV Editor")
+    if 'cv_data' not in st.session_state:
+        st.warning("No CV data extracted yet. Please go to Tab 1 and extract your data first.")
+    else:
+        cv = st.session_state['cv_data']
+        
+        st.markdown("### Profile Picture (Bewerbungsfoto)")
+        uploaded_file = st.file_uploader("Upload a professional photo (JPG/PNG) to include in your CV header:", type=['jpg', 'jpeg', 'png'])
+        if uploaded_file is not None:
+            with open("output/profile.jpg", "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            st.success("Profile picture saved! It will appear on your CV (but not on the Cover Letter).")
+        st.markdown("---")
+        
+        st.markdown("### Basics")
+        basics = cv.get('basics', {})
+        c1, c2 = st.columns(2)
+        with c1:
+            basics['name'] = st.text_input("Full Name", basics.get('name', ''))
+            basics['email'] = st.text_input("Email", basics.get('email', ''))
+        with c2:
+            basics['phone'] = st.text_input("Phone", basics.get('phone', ''))
+            loc = basics.get('location', {})
+            loc['city'] = st.text_input("City", loc.get('city', ''))
+            loc['postalCode'] = st.text_input("Postal Code", loc.get('postalCode', ''))
+            basics['location'] = loc
+            
+        basics['summary'] = st.text_area("Professional Summary", basics.get('summary', ''), height=150)
+        cv['basics'] = basics
+        
+        st.markdown("### Work Experience")
+        for i, work in enumerate(cv.get('work', [])):
+            with st.expander(f"Work: {work.get('position', 'Role')} at {work.get('name', 'Company')}"):
+                w1, w2 = st.columns(2)
+                with w1:
+                    work['position'] = st.text_input(f"Position", work.get('position', ''), key=f"w_pos_{i}")
+                    work['name'] = st.text_input(f"Company", work.get('name', ''), key=f"w_name_{i}")
+                with w2:
+                    work['startDate'] = st.text_input(f"Start Date", work.get('startDate', ''), key=f"w_start_{i}")
+                    work['endDate'] = st.text_input(f"End Date", work.get('endDate', ''), key=f"w_end_{i}")
+                
+                bullets_str = "\n".join(work.get('highlights', []))
+                edited_bullets = st.text_area(f"Highlights/Bullet points (one per line)", bullets_str, height=100, key=f"w_bull_{i}")
+                work['highlights'] = [b.strip() for b in edited_bullets.split('\n') if b.strip()]
+        
+        st.markdown("### Education")
+        for i, edu in enumerate(cv.get('education', [])):
+            with st.expander(f"Edu: {edu.get('area', 'Degree')} at {edu.get('institution', 'Institution')}"):
+                 e1, e2 = st.columns(2)
+                 with e1:
+                     edu['area'] = st.text_input(f"Degree/Area", edu.get('area', ''), key=f"e_area_{i}")
+                     edu['institution'] = st.text_input(f"Institution", edu.get('institution', ''), key=f"e_inst_{i}")
+                 with e2:
+                     edu['startDate'] = st.text_input(f"Edu Start", edu.get('startDate', ''), key=f"e_start_{i}")
+                     edu['endDate'] = st.text_input(f"Edu End", edu.get('endDate', ''), key=f"e_end_{i}")
+
+        st.markdown("### Projects")
+        for i, proj in enumerate(cv.get('projects', [])):
+            with st.expander(f"Project: {proj.get('name', 'Name')}"):
+                p1, p2 = st.columns([1, 1])
+                with p1:
+                    proj['name'] = st.text_input("Project Name", proj.get('name', ''), key=f"p_name_{i}")
+                with p2:
+                    proj['url'] = st.text_input("Project URL/Link", proj.get('url', ''), key=f"p_url_{i}")
+                
+                proj['description'] = st.text_area("Short Description", proj.get('description', ''), height=70, key=f"p_desc_{i}")
+                
+                bullets_str = "\n".join(proj.get('highlights', []))
+                edited_bullets = st.text_area("Highlights/Bullet points (one per line)", bullets_str, height=100, key=f"p_bull_{i}")
+                proj['highlights'] = [b.strip() for b in edited_bullets.split('\n') if b.strip()]
+        
+        st.markdown("### Skills")
+        for i, skill in enumerate(cv.get('skills', [])):
+             s_col1, s_col2 = st.columns([1, 2])
+             with s_col1:
+                 skill['name'] = st.text_input(f"Skill Category", skill.get('name', ''), key=f"s_name_{i}")
+             with s_col2:
+                 kw = ", ".join(skill.get('keywords', []))
+                 edited_kw = st.text_input(f"Keywords (comma separated)", kw, key=f"s_kw_{i}")
+                 skill['keywords'] = [k.strip() for k in edited_kw.split(',')]
+                 
+        if st.button("💾 Save CV Changes", use_container_width=True):
+             st.session_state['cv_data'] = cv
+             with open("data.json", "w", encoding="utf-8") as f:
+                 json.dump(cv, f, indent=2, ensure_ascii=False)
+             st.success("JSON data updated successfully! You can now export the CV.")
+
+
+# --- TAB 3: COVER LETTER ---
+with tab3:
+    st.header("Cover Letter Generation")
+    st.markdown("Generate a tailored cover letter using AI, or paste your own to format it identically to your CV.")
+    
+    col_c1, col_c2 = st.columns([1, 1])
+    with col_c1:
+        job_description = st.text_area("Paste the Job Description here (if using AI):", height=200)
+    with col_c2:
+        if st.button("✉️ AI Generate Cover Letter Data", use_container_width=True):
+             if 'cv_data' not in st.session_state:
+                 st.error("Please extract your CV data in Tab 1 first.")
+             elif not job_description.strip():
+                 st.warning("Please provide a Job Description.")
+             elif not api_key:
+                 st.error("API Key is missing.")
+             else:
+                 with st.spinner("Analyzing match and writing tailored cover letter..."):
+                     provider = 'openai' if api_provider == "OpenAI" else 'gemini'
+                     cl_data = text_analyzer.generate_cover_letter_data(st.session_state['cv_data'], job_description, api_key, provider=provider)
+                     
+                     if cl_data:
+                         st.success("Cover letter content generated! You can edit it below.")
+                         st.session_state['cl_data'] = cl_data
+                         with open("cover_letter.json", "w", encoding="utf-8") as f:
+                             json.dump(cl_data, f, indent=2, ensure_ascii=False)
+                     else:
+                         st.error("Error during generation.")
+                         
+        st.markdown("🔹 **OR**")
+        
+        if st.button("✍️ Paste My Own Cover Letter Manually", use_container_width=True):
+             dummy_cl = {
+                 "recipient": {"company": "Company Name", "contact_person": "Contact Person", "address": "Street 123", "postal_code": "12345", "city": "City"},
+                 "location": "My City",
+                 "subject": "Bewerbung als [Position]",
+                 "salutation": "Sehr geehrte(r) Herr/Frau [Name],",
+                 "paragraphs": ["Paste your first paragraph here...", "Paste your second paragraph here..."],
+                 "closing": "Mit freundlichen Grüßen"
+             }
+             st.session_state['cl_data'] = dummy_cl
+             st.success("Manual mode activated! Edit the fields below.")
+
+    if 'cl_data' in st.session_state:
+         st.markdown("---")
+         st.subheader("Cover Letter Editor")
+         cl = st.session_state['cl_data']
+         
+         # Allow editing recipient data as well
+         r1, r2, r3 = st.columns(3)
+         rec = cl.get('recipient', {})
+         with r1:
+             rec['company'] = st.text_input("Company", rec.get('company', ''))
+             rec['postal_code'] = st.text_input("Postal Code", rec.get('postal_code', ''))
+         with r2:
+             rec['contact_person'] = st.text_input("Contact Person", rec.get('contact_person', ''))
+             rec['city'] = st.text_input("City", rec.get('city', ''))
+         with r3:
+             rec['address'] = st.text_input("Street / Address", rec.get('address', ''))
+             cl['location'] = st.text_input("My Location (Date)", cl.get('location', ''))
+         
+         cl['recipient'] = rec
+         
+         c1, c2 = st.columns(2)
+         with c1: cl['subject'] = st.text_input("Subject", cl.get('subject', ''))
+         with c2: cl['salutation'] = st.text_input("Salutation", cl.get('salutation', ''))
+         
+         cl_body = "\n\n".join(cl.get('paragraphs', []))
+         edited_body = st.text_area("Body Paragraphs (separated by double newlines)", cl_body, height=250)
+         cl['paragraphs'] = [p.strip() for p in edited_body.split('\n\n') if p.strip()]
+         
+         if st.button("💾 Save Cover Letter Edits", use_container_width=True):
+             st.session_state['cl_data'] = cl
+             with open("cover_letter.json", "w", encoding="utf-8") as f:
+                 json.dump(cl, f, indent=2, ensure_ascii=False)
+             st.success("Cover letter edits saved! You can now export it.")
+
+# --- TAB 4: EXPORT ---
+with tab4:
+    st.header("Export Documents")
+    
+    cv_ready = os.path.exists("data.json")
+    cl_ready = os.path.exists("cover_letter.json")
+    
+    export_c1, export_c2, export_c3 = st.columns(3)
+    
+    with export_c1:
+        st.subheader("📄 1. Standalone CV")
+        if not cv_ready:
+            st.warning("Extract your CV data first (Tab 1).")
+        else:
+            if st.button("Generate CV Document", use_container_width=True):
+                 with st.spinner("Building Docx..."):
+                     ts = time.strftime("%Y%m%d_%H%M%S")
+                     fname = f"output/Resume_{ts}.docx"
+                     cv_generator.generate_cv("data.json", fname)
+                     st.session_state['out_cv'] = fname
+                     st.success("Generated successfully!")
+            if 'out_cv' in st.session_state:
+                 path = st.session_state['out_cv']
+                 with open(path, "rb") as f:
+                      st.download_button("⬇️ Download CV", data=f, file_name=os.path.basename(path), mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
+                 if st.button("📂 Open CV File", use_container_width=True, key="open_cv"):
+                     os.startfile(os.path.abspath(path))
+
+    with export_c2:
+        st.subheader("✉️ 2. Cover Letter")
+        if not cl_ready:
+            st.warning("Generate your Cover Letter first (Tab 3).")
+        else:
+            if st.button("Generate Cover Letter", use_container_width=True):
+                 with st.spinner("Building Docx..."):
+                     ts = time.strftime("%Y%m%d_%H%M%S")
+                     fname = f"output/CoverLetter_{ts}.docx"
+                     cover_letter_generator.generate_cover_letter("data.json", "cover_letter.json", fname)
+                     st.session_state['out_cl'] = fname
+                     st.success("Generated successfully!")
+            if 'out_cl' in st.session_state:
+                 path = st.session_state['out_cl']
+                 with open(path, "rb") as f:
+                      st.download_button("⬇️ Download Cover Letter", data=f, file_name=os.path.basename(path), mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
+                 if st.button("📂 Open Cover Letter", use_container_width=True, key="open_cl"):
+                     os.startfile(os.path.abspath(path))
+
+    with export_c3:
+        st.subheader("📥 3. Combined Application")
+        if not (cv_ready and cl_ready):
+             st.warning("Both CV and Cover Letter must be generated.")
+        else:
+            if st.button("Generate Combined Doc", use_container_width=True):
+                 with st.spinner("Building Docx..."):
+                     ts = time.strftime("%Y%m%d_%H%M%S")
+                     fname = f"output/Application_{ts}.docx"
+                     combined_generator.generate_combined("data.json", "cover_letter.json", fname)
+                     st.session_state['out_combo'] = fname
+                     st.success("Generated successfully!")
+            if 'out_combo' in st.session_state:
+                 path = st.session_state['out_combo']
+                 with open(path, "rb") as f:
+                      st.download_button("⬇️ Download Application", data=f, file_name=os.path.basename(path), mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
+                 if st.button("📂 Open Application", use_container_width=True, key="open_combo"):
+                     os.startfile(os.path.abspath(path))

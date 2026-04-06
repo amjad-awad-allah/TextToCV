@@ -1,5 +1,6 @@
 import sys
 import json
+import datetime
 import docx
 from docx import Document
 from docx.shared import Pt, RGBColor, Inches, Mm
@@ -130,42 +131,7 @@ def add_dynamic_page_number(paragraph):
     fldChar3.set(qn('w:fldCharType'), 'end')
     run._r.append(fldChar3)
 
-
-def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
-    try:
-        with open(json_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-    except Exception as e:
-        print(f"❌ Error loading {json_file}: {e}")
-        return
-
-    doc = Document()
-    style = doc.styles['Normal']
-    style.font.name = 'Calibri'
-    style.font.size = Pt(10.5)
-    
-    # Page setup (DIN 5008 approx)
-    for section in doc.sections:
-        section.page_width = Mm(210)
-        section.page_height = Mm(297)
-        section.top_margin = Mm(20)
-        section.bottom_margin = Mm(20)
-        section.left_margin = Mm(25)
-        section.right_margin = Mm(20)
-        
-        # Footer
-        footer = section.footer
-        p = footer.paragraphs[0] if footer.paragraphs else footer.add_paragraph()
-        p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        p.paragraph_format.space_before = Pt(0)
-        r = p.add_run()
-        r.font.size = Pt(8.5)
-        r.font.color.rgb = RGBColor(120, 120, 120)
-        r.add_text("Seite ")
-        add_dynamic_page_number(p)
-
-    basics = data.get("basics", {})
-    
+def _build_header(doc, basics, include_photo=False):
     # HEADER - Transparent Table with Photo Support
     header_table = doc.add_table(rows=1, cols=2)
     header_table.autofit = False
@@ -211,7 +177,9 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
     cell_right = header_table.cell(0, 1)
     p_right = cell_right.paragraphs[0]
     p_right.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    if os.path.exists("output/profile.jpg"):
+    
+    import os
+    if include_photo and os.path.exists("output/profile.jpg"):
         try:
             r_pic = p_right.add_run()
             r_pic.add_picture("output/profile.jpg", width=Inches(1.2))
@@ -219,6 +187,97 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
             print(f"Error loading picture: {e}")
             
     doc.add_paragraph().paragraph_format.space_after = Pt(10)
+
+def generate_combined(cv_json_file="data.json", letter_json_file="cover_letter.json", output_file="Combined_Application.docx"):
+    try:
+        with open(cv_json_file, 'r', encoding='utf-8') as f:
+            cv_data = json.load(f)
+        with open(letter_json_file, 'r', encoding='utf-8') as f:
+            letter_data = json.load(f)
+    except Exception as e:
+        print(f"❌ Error loading files: {e}")
+        return
+
+    doc = Document()
+    style = doc.styles['Normal']
+    style.font.name = 'Calibri'
+    style.font.size = Pt(10.5)
+    
+    # Page setup
+    for section in doc.sections:
+        section.page_width = Mm(210)
+        section.page_height = Mm(297)
+        section.top_margin = Mm(20)
+        section.bottom_margin = Mm(20)
+        section.left_margin = Mm(25)
+        section.right_margin = Mm(20)
+        
+        # Footer
+        footer = section.footer
+        p = footer.paragraphs[0] if footer.paragraphs else footer.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        p.paragraph_format.space_before = Pt(0)
+        r = p.add_run()
+        r.font.size = Pt(8.5)
+        r.font.color.rgb = RGBColor(120, 120, 120)
+        r.add_text("Seite ")
+        add_dynamic_page_number(p)
+
+    basics = cv_data.get("basics", {})
+    recipient = letter_data.get("recipient", {})
+
+    # ==========================
+    # PAGE 1: COVER LETTER
+    # ==========================
+    _build_header(doc, basics, include_photo=False)
+
+    # Recipient
+    rec_p = doc.add_paragraph()
+    rec_p.paragraph_format.space_after = Pt(15)
+    rec_text = f"{clean_markdown(recipient.get('company', ''))}\n{clean_markdown(recipient.get('contact_person', ''))}\n{clean_markdown(recipient.get('address', ''))}\n{clean_markdown(recipient.get('postal_code', ''))} {clean_markdown(recipient.get('city', ''))}"
+    rec_p.add_run(rec_text).font.size = Pt(10)
+
+    # Date
+    p_date = doc.add_paragraph()
+    p_date.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    p_date.paragraph_format.space_after = Pt(20)
+    now = datetime.datetime.now()
+    date_str = f"{clean_markdown(letter_data.get('location', basics.get('location', {}).get('city', 'Ort')))}, {now.strftime('%d.%m.%Y')}"
+    p_date.add_run(date_str).font.size = Pt(10)
+
+    # Subject
+    p_sub = doc.add_paragraph()
+    p_sub.paragraph_format.space_after = Pt(15)
+    run_sub = p_sub.add_run(clean_markdown(letter_data.get('subject', 'Bewerbung')))
+    run_sub.bold = True
+    run_sub.font.size = Pt(11)
+    run_sub.font.color.rgb = RGBColor(0, 51, 102)
+
+    # Body
+    p_sal = doc.add_paragraph(clean_markdown(letter_data.get('salutation', 'Sehr geehrte Damen und Herren,')))
+    p_sal.paragraph_format.space_after = Pt(8)
+
+    for para in letter_data.get('paragraphs', []):
+        p_body = doc.add_paragraph(clean_markdown(para))
+        p_body.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        p_body.paragraph_format.space_after = Pt(8)
+        p_body.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+
+    # Closing
+    doc.add_paragraph().paragraph_format.space_after = Pt(10)
+    p_close = doc.add_paragraph(clean_markdown(letter_data.get('closing', 'Mit freundlichen Grüßen')))
+    p_close.paragraph_format.space_after = Pt(30)
+    p_sig = doc.add_paragraph()
+    r_sig = p_sig.add_run(clean_markdown(basics.get("name", "")))
+    r_sig.bold = True
+
+    # PAGE BREAK
+    doc.add_page_break()
+
+    # ==========================
+    # PAGE 2+: CV
+    # ==========================
+    _build_header(doc, basics, include_photo=True)
 
     # PROFIL
     summary = basics.get("summary", "")
@@ -232,7 +291,7 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
         ps.paragraph_format.widow_control = True
 
     # BERUFSERFAHRUNG
-    work_items = data.get("work", [])
+    work_items = cv_data.get("work", [])
     if work_items:
         add_section_heading(doc, 'Berufserfahrung')
         for job in work_items:
@@ -241,26 +300,22 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
             p.paragraph_format.space_before = Pt(4)
             p.paragraph_format.keep_with_next = True
             p.paragraph_format.keep_together = True
-            
             r_left = p.add_run(f"{clean_markdown(job.get('position', ''))} | {clean_markdown(job.get('name', ''))}")
             r_left.bold = True
             r_left.font.size = Pt(10.5)
-            
             tab_stops = p.paragraph_format.tab_stops
             tab_stops.add_tab_stop(Mm(165), WD_TAB_ALIGNMENT.RIGHT)
-            
             date_str = f"{format_date(job.get('startDate', ''))} – {format_date(job.get('endDate', 'heute'))}"
             r_date = p.add_run(f"\t{date_str}")
             r_date.italic = True
             r_date.font.color.rgb = RGBColor(90, 90, 90)
             r_date.font.size = Pt(9.5)
-            
             for bullet in job.get('highlights', []):
                 bp = add_bullet(doc, bullet, font_size=9.5, indent=0.35, space_after=1)
                 if bp: bp.paragraph_format.keep_with_next = False
 
     # AUSBILDUNG
-    edu_items = data.get("education", [])
+    edu_items = cv_data.get("education", [])
     if edu_items:
         add_section_heading(doc, 'Ausbildung')
         for edu in edu_items:
@@ -269,11 +324,9 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
             p.paragraph_format.space_before = Pt(4)
             p.paragraph_format.keep_with_next = True
             p.paragraph_format.keep_together = True
-            
             r = p.add_run(f"{clean_markdown(edu.get('area', ''))} | {clean_markdown(edu.get('institution', ''))}")
             r.bold = True
             r.font.size = Pt(10.5)
-            
             tab_stops = p.paragraph_format.tab_stops
             tab_stops.add_tab_stop(Mm(165), WD_TAB_ALIGNMENT.RIGHT)
             date_str = f"{format_date(edu.get('startDate', ''))} – {format_date(edu.get('endDate', ''))}"
@@ -281,48 +334,12 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
             r_date.italic = True
             r_date.font.color.rgb = RGBColor(90, 90, 90)
             r_date.font.size = Pt(9.5)
-            
             if edu.get('notes'):
                 bp = add_bullet(doc, edu.get('notes'), font_size=9.5, indent=0.35, space_after=1)
                 if bp: bp.paragraph_format.keep_with_next = False
 
-    # PROJEKTE
-    proj_items = data.get("projects", [])
-    if proj_items:
-        add_section_heading(doc, 'Projekte')
-        for proj in proj_items:
-            p = doc.add_paragraph()
-            p.paragraph_format.space_after = Pt(1)
-            p.paragraph_format.space_before = Pt(4)
-            p.paragraph_format.keep_with_next = True
-            p.paragraph_format.keep_together = True
-            
-            url = proj.get('url', '')
-            name_text = f"{clean_markdown(proj.get('name', ''))}"
-            
-            if url:
-                add_hyperlink(p, url, name_text, bold=True, size=10.5)
-            else:
-                r_title = p.add_run(name_text)
-                r_title.bold = True
-                r_title.font.size = Pt(10.5)
-            
-            # Description underneath
-            if proj.get('description'):
-                p_desc = doc.add_paragraph()
-                p_desc.paragraph_format.space_after = Pt(2)
-                p_desc.paragraph_format.space_before = Pt(1)
-                r_desc = p_desc.add_run(clean_markdown(proj.get('description', '')))
-                r_desc.italic = True
-                r_desc.font.size = Pt(9.5)
-            
-            # Highlights
-            for bullet in proj.get('highlights', []):
-                bp = add_bullet(doc, bullet, font_size=9.5, indent=0.35, space_after=1)
-                if bp: bp.paragraph_format.keep_with_next = False
-
     # TECHNISCHE KENNTNISSE
-    skills_items = data.get("skills", [])
+    skills_items = cv_data.get("skills", [])
     if skills_items:
         add_section_heading(doc, 'Technische Kenntnisse')
         for skill in skills_items:
@@ -330,7 +347,6 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
             p.paragraph_format.space_after = Pt(1)
             p.paragraph_format.space_before = Pt(2)
             p.paragraph_format.keep_together = True
-            
             r = p.add_run(f"{clean_markdown(skill.get('name', ''))}: ")
             r.bold = True
             r.font.size = Pt(9.5)
@@ -338,7 +354,7 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
             p.add_run(clean_markdown(keywords)).font.size = Pt(9.5)
 
     # PROJEKTE
-    projects_items = data.get("projects", [])
+    projects_items = cv_data.get("projects", [])
     if projects_items:
         add_section_heading(doc, 'Projekte (Auswahl)')
         for proj in projects_items:
@@ -347,16 +363,13 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
             p.paragraph_format.space_before = Pt(4)
             p.paragraph_format.keep_with_next = True
             p.paragraph_format.keep_together = True
-            
             name_text = f"{clean_markdown(proj.get('name', ''))} | {format_date(proj.get('startDate', ''))}"
             url = proj.get('url', '')
-            if url:
-                add_hyperlink(p, url, name_text, bold=True, size=10)
+            if url: add_hyperlink(p, url, name_text, bold=True, size=10)
             else:
                 r = p.add_run(name_text)
                 r.bold = True
                 r.font.size = Pt(10)
-            
             if proj.get('description'):
                 bp = add_bullet(doc, f"Beschreibung: {proj.get('description')}", font_size=9.5, indent=0.35, space_after=1)
                 if bp: bp.paragraph_format.keep_with_next = False
@@ -364,42 +377,38 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
                 bp = add_bullet(doc, h, font_size=9.5, indent=0.35, space_after=1)
                 if bp: bp.paragraph_format.keep_with_next = False
 
-    # ZERTIFIKATE (1 column)
-    cert_items = data.get("certificates", [])
+    # ZERTIFIKATE
+    cert_items = cv_data.get("certificates", [])
     if cert_items:
         add_section_heading(doc, 'Zertifikate & Weiterbildung')
         for c in cert_items:
             if isinstance(c, dict):
                 text = f"{clean_markdown(c.get('name', ''))} – {clean_markdown(c.get('issuer', ''))}"
-                if c.get('date'):
-                    formatted_date = format_date(c.get('date'))
-                    text += f" ({formatted_date})"
+                if c.get('date'): text += f" ({format_date(c.get('date'))})"
                 add_bullet(doc, text, font_size=9.5, indent=0.15, space_after=1)
             else:
                 add_bullet(doc, clean_markdown(str(c)), font_size=9.5, indent=0.15, space_after=1)
 
-    # SPRACHEN (1 column)
-    lang_items = data.get("languages", [])
+    # SPRACHEN
+    lang_items = cv_data.get("languages", [])
     if lang_items:
         add_section_heading(doc, 'Sprachen')
         for i, l in enumerate(lang_items):
-            if isinstance(l, dict):
-                text = f"{clean_markdown(l.get('language', ''))}: {clean_markdown(l.get('fluency', ''))}"
-            else:
-                text = clean_markdown(str(l))
-                
+            if isinstance(l, dict): text = f"{clean_markdown(l.get('language', ''))}: {clean_markdown(l.get('fluency', ''))}"
+            else: text = clean_markdown(str(l))
             p = add_bullet(doc, text, font_size=9.5, indent=0.15, space_after=1)
-            if p and i < len(lang_items) - 1:
-                p.paragraph_format.keep_with_next = True
+            if p and i < len(lang_items) - 1: p.paragraph_format.keep_with_next = True
 
-    # Save
     doc.save(output_file)
     print(f"✅ Erfolg: {output_file} wurde generiert.")
-    print("📄 Bitte prüfen: Keine Markdown-Symbole, ATS freundlich, Bullet Points (•)")
 
 if __name__ == '__main__':
-    json_input = "data.json"
-    word_output = "Generated_CV.docx"
-    if len(sys.argv) >= 2: json_input = sys.argv[1]
-    if len(sys.argv) >= 3: word_output = sys.argv[2]
-    generate_cv(json_input, word_output)
+    cv_input = "data.json"
+    letter_input = "cover_letter.json"
+    word_output = "Combined_Application.docx"
+    if len(sys.argv) >= 3:
+        cv_input = sys.argv[1]
+        letter_input = sys.argv[2]
+    if len(sys.argv) >= 4:
+        word_output = sys.argv[3]
+    generate_combined(cv_input, letter_input, word_output)

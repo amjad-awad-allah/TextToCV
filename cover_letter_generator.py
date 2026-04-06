@@ -78,7 +78,7 @@ def generate_cover_letter(cv_data_file="data.json", letter_data_file="cover_lett
     
     style = doc.styles['Normal']
     style.font.name = 'Calibri'
-    style.font.size = Pt(10) # Base text identical to CV
+    style.font.size = Pt(11) # Base text slightly larger for Cover Letter
     
     # 1. Page Margins (German Standards identical to CV)
     for section in doc.sections:
@@ -95,38 +95,39 @@ def generate_cover_letter(cv_data_file="data.json", letter_data_file="cover_lett
     # ==========================================
     # LETTERHEAD (Identical Header to CV)
     # ==========================================
-    header_table = doc.add_table(rows=1, cols=2)
-    header_table.autofit = False
-    header_table.columns[0].width = Inches(5.0)
-    header_table.columns[1].width = Inches(2.2)
-    header_table.style = None
+    p_header = doc.add_paragraph()
+    p_header.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_header.paragraph_format.space_after = Pt(20)
+    p_header.paragraph_format.keep_together = True
     
-    cell_left = header_table.cell(0, 0)
-    p = cell_left.paragraphs[0]
-    p.paragraph_format.space_after = Pt(0)
-    run_name = p.add_run(clean_markdown(basics.get("name", "")) + "\n")
+    run_name = p_header.add_run(clean_markdown(basics.get("name", "")) + "\n")
     run_name.bold = True
-    run_name.font.size = Pt(18)
+    run_name.font.size = Pt(16)
     run_name.font.color.rgb = RGBColor(0, 51, 102)
     
     location = basics.get('location', {})
     city_str = f"{clean_markdown(location.get('postalCode', ''))} {clean_markdown(location.get('city', ''))}"
     address = location.get('address', '')
     if address: city_str += f" ({clean_markdown(address)})"
-    contact_text = f"{clean_markdown(basics.get('email', ''))} | {clean_markdown(basics.get('phone', ''))}\n{city_str}"
-    p.add_run(contact_text).font.size = Pt(9.5)
+    
+    contact_parts = []
+    if basics.get('email'): contact_parts.append(clean_markdown(basics.get('email')))
+    if basics.get('phone'): contact_parts.append(clean_markdown(basics.get('phone')))
+    if city_str.strip(): contact_parts.append(city_str.strip())
+    
+    contact_text = " | ".join(contact_parts)
+    if contact_text:
+        p_header.add_run(contact_text).font.size = Pt(9.5)
     
     profiles = basics.get("profiles", [])
     if profiles:
-        p.add_run("\n")
+        if contact_text: p_header.add_run(" | ").font.size = Pt(9.5)
         for i, prof in enumerate(profiles):
             url = prof.get("url", "") if isinstance(prof, dict) else prof
             if url:
                 display = url.replace("https://", "").replace("http://", "").replace("www.", "").strip('/')
-                add_hyperlink(p, url, display, size=9.5)
-                if i < len(profiles) - 1: p.add_run(" | ").font.size = Pt(9.5)
-
-    doc.add_paragraph().paragraph_format.space_after = Pt(20)
+                add_hyperlink(p_header, url, display, size=9.5)
+                if i < len(profiles) - 1: p_header.add_run(" | ").font.size = Pt(9.5)
 
     # ==========================================
     # RECIPIENT BLOCK & DATE (DIN 5008 Style)
