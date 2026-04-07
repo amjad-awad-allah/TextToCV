@@ -1,0 +1,233 @@
+{
+  "basics": {
+    "name": "Amjad Awad-Allah",
+    "email": "amjad.awadallah93@gmail.com",
+    "phone": "+49 163 9055276",
+    "url": "http://amjadawadallah.com",
+    "summary": "Softwareentwickler mit mehr als 4 Jahren Erfahrung in Android-Entwicklung. Aktuell in Umschulung zum Fachinformatiker (IHK). Suche ein 11-monatiges Pflichtpraktikum ab Juli 2026, um meine Fähigkeiten in realen Projekten im deutschen Markt einzubringen und zu vertiefen.",
+    "location": {
+      "city": "Essen",
+      "postalCode": "45307 "
+    },
+    "profiles": [
+      {
+        "network": "LinkedIn",
+        "url": "https://linkedin.com/in/amjad-awad-allah"
+      },
+      {
+        "network": "GitHub",
+        "url": "https://github.com/amjad-awad-allah"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "Freiberufliche Web-Projekte",
+      "position": "Frontend/Backend-Entwicklung",
+      "startDate": "2021-07",
+      "endDate": "2025-05",
+      "highlights": [
+        "Entwicklung einer responsiven Unternehmenswebsite mit Vue.js und TypeScript (Fliesen Demirel)",
+        "Fullstack-Entwicklung mit PHP/Laravel für Bauunternehmen in Dubai (Road Shield Solutions)",
+        "Selbstständige Projektumsetzung: Von der Anforderungsanalyse bis zur Abnahme",
+        "Verbesserung der Online-Sichtbarkeit und Nutzererfahrung für beide Kunden"
+      ]
+    },
+    {
+      "name": "NVS-SOFT",
+      "position": "Android-Entwickler",
+      "startDate": "2018-01",
+      "endDate": "2021-09",
+      "highlights": [
+        "Entwicklung von Enterprise-Apps (Tarasol, Arcmate 9) mit Offline-Sync und komplexen Dokumenten-Workflows für staatliche Kunden",
+        "Steigerung der Performance durch Multithreading bei großen Datenmengen",
+        "Implementierung sicherer PDF-Verarbeitung: Signatur, Stempel, Verschlüsselung",
+        "Sehr stabile Apps auch bei instabiler Netzwerkverbindung durch robuste Fehlerbehandlung"
+      ]
+    },
+    {
+      "name": "SmartAngle",
+      "position": "Android-Entwickler (Remote, Teilzeit)",
+      "startDate": "2020-05",
+      "endDate": "2021-03",
+      "highlights": [
+        "Entwicklung von E-Learning- und Social-Apps in internationalen Teams",
+        "Anforderungsanalyse und kundenspezifische Feature-Implementierung",
+        "Termingerechte Umsetzung durch agile Abstimmung mit Stakeholdern"
+      ]
+    },
+    {
+      "name": "PRO-Tech Group",
+      "position": "Software-Entwickler",
+      "startDate": "2017-02",
+      "endDate": "2018-06",
+      "highlights": [
+        "Entwicklung von Mobile- und IPTV-Lösungen mit Streaming-Protokollen",
+        "Erstellung technischer Dokumentation und Anwendung von Code-Standards",
+        "Erhöhte Wartbarkeit und Stabilität der Codebase durch Clean-Code-Praktiken"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "BFZ Essen",
+      "area": "Fachinformatiker für Anwendungsentwicklung",
+      "studyType": "Umschulung",
+      "startDate": "2025",
+      "endDate": "heute",
+      "courses": [],
+      "notes": "Umschulung nach IHK-Standard: Java, C#, SQL, Scrum, Spring Boot. IHK-Prüfung noch ausstehend. Pflichtpraktikum (11 Monate) ab Juli 2026."
+    },
+    {
+      "institution": "Arab International University",
+      "area": "Informatik – Schwerpunkt Künstliche Intelligenz",
+      "studyType": "Bachelor of Science (B.Sc.)",
+      "startDate": "2012",
+      "endDate": "2017",
+      "courses": [],
+      "notes": "Abgeschlossen."
+    }
+  ],
+  "skills": [
+    {
+      "name": "Technische Kenntnisse",
+      "keywords": [
+        "Android: Java",
+        "Kotlin",
+        "Android SDK",
+        "MVVM/MVP",
+        "Multithreading",
+        "SQLite/Room",
+        "Retrofit",
+        "FCM",
+        "PDF-Verarbeitung",
+        "Barcode-Scanning",
+        "Web: TypeScript",
+        "Vue.js",
+        "PHP",
+        "Laravel",
+        "HTML5/CSS3",
+        "Responsive Design",
+        "SEO-Basics",
+        "Performance-Optimierung",
+        "Backend: REST API",
+        "SQL (PostgreSQL/MySQL)",
+        "Spring Boot (in Ausbildung)",
+        "C# (in Ausbildung)",
+        "Weitere Kenntnisse: Clean Code",
+        "Git/GitLab",
+        "Scrum"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Tarasol Suite – Enterprise Correspondence",
+      "description": "Mobile Client für Dokumentenmanagement mit Offline-Sync",
+      "highlights": [
+        "Push-Notifications für eingehende Korrespondenz in Echtzeit",
+        "On-Screen-Signatur mit PIN-Verifizierung für sichere Freigaben",
+        "Offline-Bearbeitung mit automatischer Synchronisation bei Verbindung",
+        "Vollverschlüsselung, Task-Management, Document-Routing",
+        "Ermöglicht papierlose Workflows mit voller Verschlüsselung für Behörden"
+      ],
+      "keywords": [],
+      "url": ""
+    },
+    {
+      "name": "Arcmate 9 – Document Repository Client",
+      "description": "Mobile App für Dokumenten- und Informationsverwaltung im Behördenumfeld",
+      "highlights": [
+        "Schnelles Retrieval mit erweiterter Suche und serverseitiger Renditions",
+        "Offline-Modus mit Auto-Sync für unterbrechungsfreies Arbeiten",
+        "Document-Routing und interne Mail-Funktion",
+        "Nahtlose Integration in bestehende Infrastruktur des Kunden"
+      ],
+      "keywords": [],
+      "url": ""
+    },
+    {
+      "name": "Fliesen Demirel – Unternehmenswebsite",
+      "description": "Responsive Website mit Fokus auf UX und Performance",
+      "highlights": [
+        "Vue.js Single-File Components mit flüssigen Animationen",
+        "Mobile-First Ansatz: 100% responsive auf allen Endgeräten",
+        "Geringere Ladezeiten durch Lazy Loading und Code Splitting"
+      ],
+      "keywords": [],
+      "url": ""
+    },
+    {
+      "name": "Road Shield Solutions – Firmenwebsite",
+      "description": "Fullstack-Entwicklung einer Website mit Fokus auf Lead-Generierung",
+      "highlights": [
+        "Laravel Backend: RESTful API, Authentifizierung, optimierte Datenbank",
+        "Responsive Frontend mit Blade-Templates und JavaScript-Interactions",
+        "Alleinige Umsetzung von Konzept bis Live-Deployment"
+      ],
+      "keywords": [],
+      "url": ""
+    }
+  ],
+  "certificates": [
+    {
+      "name": "Junior Cybersecurity Analyst Career Path",
+      "issuer": "Cisco NA",
+      "date": "12.2025"
+    },
+    {
+      "name": "Introduction to Cybersecurity",
+      "issuer": "Cisco Networking Academy",
+      "date": "12.2025"
+    },
+    {
+      "name": "Python Essentials 1",
+      "issuer": "Cisco Networking Academy",
+      "date": "01.2026"
+    },
+    {
+      "name": "JavaScript Essentials 1",
+      "issuer": "Cisco Networking Academy",
+      "date": "12.2025"
+    },
+    {
+      "name": "JavaScript Essentials 2",
+      "issuer": "Cisco Networking Academy",
+      "date": "01.2026"
+    },
+    {
+      "name": "Introduction to IoT",
+      "issuer": "Cisco Networking Academy",
+      "date": "01.2026"
+    },
+    {
+      "name": "Introduction to Modern AI",
+      "issuer": "Cisco Networking Academy",
+      "date": "12.2025"
+    },
+    {
+      "name": "Deutsch B2",
+      "issuer": "Weststadt Akademie",
+      "date": "2025"
+    },
+    {
+      "name": "Deutsch B1",
+      "issuer": "DÜS Eckert",
+      "date": "2024"
+    }
+  ],
+  "languages": [
+    {
+      "language": "Arabisch",
+      "fluency": "Muttersprache"
+    },
+    {
+      "language": "Deutsch",
+      "fluency": "B2 - berufliche Kommunikation möglich"
+    },
+    {
+      "language": "Englisch",
+      "fluency": "Fortgeschritten - Verhandlungssicher"
+    }
+  ]
+}
