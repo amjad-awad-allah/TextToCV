@@ -338,32 +338,6 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
             keywords = ", ".join(skill.get('keywords', []))
             p.add_run(clean_markdown(keywords)).font.size = Pt(9.5)
 
-    # PROJEKTE
-    projects_items = data.get("projects", [])
-    if projects_items:
-        add_section_heading(doc, 'Projekte (Auswahl)')
-        for proj in projects_items:
-            p = doc.add_paragraph()
-            p.paragraph_format.space_after = Pt(1)
-            p.paragraph_format.space_before = Pt(4)
-            p.paragraph_format.keep_with_next = True
-            p.paragraph_format.keep_together = True
-            
-            name_text = f"{clean_markdown(proj.get('name', ''))} | {format_date(proj.get('startDate', ''))}"
-            url = proj.get('url', '')
-            if url:
-                add_hyperlink(p, url, name_text, bold=True, size=10)
-            else:
-                r = p.add_run(name_text)
-                r.bold = True
-                r.font.size = Pt(10)
-            
-            if proj.get('description'):
-                bp = add_bullet(doc, f"Beschreibung: {proj.get('description')}", font_size=9.5, indent=0.35, space_after=1)
-                if bp: bp.paragraph_format.keep_with_next = False
-            for h in proj.get('highlights', []):
-                bp = add_bullet(doc, h, font_size=9.5, indent=0.35, space_after=1)
-                if bp: bp.paragraph_format.keep_with_next = False
 
     # ZERTIFIKATE (1 column)
     cert_items = data.get("certificates", [])

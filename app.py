@@ -113,6 +113,10 @@ with tab2:
         with c2:
             basics['phone'] = st.text_input("Phone", basics.get('phone', ''))
             loc = basics.get('location', {})
+            if isinstance(loc, str):
+                loc = {'city': loc, 'postalCode': ''}
+            elif not isinstance(loc, dict):
+                loc = {}
             loc['city'] = st.text_input("City", loc.get('city', ''))
             loc['postalCode'] = st.text_input("Postal Code", loc.get('postalCode', ''))
             basics['location'] = loc
