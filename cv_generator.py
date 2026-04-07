@@ -185,6 +185,8 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
     
     # 2. Contact details + Links
     location = basics.get('location', {})
+    if isinstance(location, str): location = {'city': location}
+    elif not isinstance(location, dict): location = {}
     city_str = f"{clean_markdown(location.get('postalCode', ''))} {clean_markdown(location.get('city', ''))}"
     address = location.get('address', '')
     if address: city_str += f" ({clean_markdown(address)})"

@@ -63,35 +63,35 @@ Zu analysierender Text:
 
 def generate_cover_letter_data(cv_data: dict, job_description: str, api_key: str, provider: str = 'gemini') -> Optional[dict]:
     prompt = f"""
-أريدك أن تتصرف كخبير توظيف ألماني محترف (German Career Coach Expert) ومحرر خطابات رسمي.
-مهمتك هي كتابة "Anschreiben" (خطاب تغطية) باللغة الألمانية أو لغة الإعلان الوظيفي بناءً على البيانات التي سأزودك بها.
+Act as a professional German Career Coach Expert and formal cover letter writer.
 
-⚠️ اتبع القواعد الصارمة التالية لضمان الجودة:
+Your task is to write an "Anschreiben" (Cover Letter) in German or the language of the job advertisement, based on the provided data.
 
-1. الهيكلية (Structure):
-   - يجب أن تتبع الهيكلية الرسمية للخطابات الألمانية (DIN 5008).
-   - الترويسة (Header): استخرج بيانات الشركة للحقول أدناه.
-   - التحية (Anrede): حاول إيجاد اسم شخص محدد. إذا لم يوجد، استخدم "Sehr geehrtes Recruiting-Team" وتجنب "Sehr geehrte Damen und Herren" قدر الإمكان.
-   - المقدمة (Einleitung): لا تبدأ بـ "Hiermit bewerbe ich mich". ابدأ بجملة جاذبة تظهر شغفي بالشركة أو المنتج.
-   - الجسم (Hauptteil): اربط مهاراتي مباشرة بمتطلبات الوظيفة. استخدم أمثلة ملموسة (أرقام، مشاريع، تقنيات) حصراً من سيرتي ولا تخترع شيئاً.
-   - الخاتمة (Schluss): ذكر تاريخ البدء، والراتب المتوقع (إذا طُلب). طلب مقابلة بثقة.
-   - التوقيع (Grußformel): "Mit freundlichen Grüßen".
+⚠️ Strictly follow these rules:
 
-2. النبرة والأسلوب (Tone & Style):
-   - اللغة: رسمية (Sie-Form) ولكن بحماس وحيوية (Modern Business German). توافق مع لغة الإعلان الوظيفي.
-   - تجنب الكلمات الرنانة الفارغة (مثل: "belastbar", "teamfähig" دون دليل). استبدلها بأفعال وإنجازات.
-   - الطول: لا يتجاوز صفحة واحدة (حوالي 250-350 كلمة).
-   - تجنب الأخطاء القواعدية والإملائية تمامًا.
+1. Structure:
+- Follow a modern professional German cover letter structure (without the full DIN 5008 header formatting).
+- Salutation (Anrede): Use a specific name only if explicitly mentioned in the job description, otherwise use "Sehr geehrtes Recruiting-Team".
+- First Paragraph (Motivation): Clearly explain why this specific company and this specific role. Do NOT start with "Hiermit bewerbe ich mich".
+- Second Paragraph (Experience): Mention real practical experience with clear examples and technologies used.
+- Third Paragraph (Skill Matching): Directly connect the candidate's skills to the job requirements and demonstrate the ability to learn quickly.
+- Last Paragraph (Closing): Mention availability and express a strong desire for an interview.
+- Mention salary expectations ONLY if explicitly requested in the job description.
+- Close with "Mit freundlichen Grüßen".
+- Do not repeat the same idea across different paragraphs.
 
-3. التخصيص (Customization):
-   - اذكر اسم الشركة ورؤيتها (Vision) بوضوح في المقدمة.
-   - إذا كانت هناك فجوة في المهارات بين سيرتي والوظيفة، اذكر أن مهاراتي قابلة للنقل (Transferable Skills) وأنني أتعلم بسرعة.
-   - استخدم كلمات مفتاحية من وصف الوظيفة (Keywords) لتحسين القراءة الآلية (ATS).
+2. Content & Tone:
+- Use formal and professional German language (B2-C1 level).
+- Do not use generic phrases or clichés.
+- Use ONLY information provided in the CV and the Job Description (Do NOT invent or hallucinate data).
+- Focus on achievements and business impact rather than just listing tasks.
+- Use a clear, direct, and professional tone without filler words.
 
-4. التنسيق (Formatting):
-   - استخدم فقرات قصيرة وواضحة (في مصفوفة paragraphs).
-   - لا تستخدم نقاطًا (Bullet points) كثيرة داخل النص الرئيسي.
-
+3. Customization & Optimization:
+- Directly link each paragraph to the job requirements.
+- Naturally integrate keywords from the job advertisement.
+- Optimize the text to be ATS-friendly.
+- Use short, clear paragraphs without bullet points.
 Gebe die Antwort NUR im folgenden JSON-Format aus:
 
 {{

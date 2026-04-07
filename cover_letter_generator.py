@@ -106,6 +106,8 @@ def generate_cover_letter(cv_data_file="data.json", letter_data_file="cover_lett
     run_name.font.color.rgb = RGBColor(0, 51, 102)
     
     location = basics.get('location', {})
+    if isinstance(location, str): location = {'city': location}
+    elif not isinstance(location, dict): location = {}
     city_str = f"{clean_markdown(location.get('postalCode', ''))} {clean_markdown(location.get('city', ''))}"
     address = location.get('address', '')
     if address: city_str += f" ({clean_markdown(address)})"

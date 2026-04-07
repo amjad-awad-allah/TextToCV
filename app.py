@@ -234,14 +234,14 @@ with tab3:
          r1, r2, r3 = st.columns(3)
          rec = cl.get('recipient', {})
          with r1:
-             rec['company'] = st.text_input("Company", rec.get('company', ''))
-             rec['postal_code'] = st.text_input("Postal Code", rec.get('postal_code', ''))
+             rec['company'] = st.text_input("Company", rec.get('company', ''), key="cl_company")
+             rec['postal_code'] = st.text_input("Postal Code", rec.get('postal_code', ''), key="cl_postal_code")
          with r2:
-             rec['contact_person'] = st.text_input("Contact Person", rec.get('contact_person', ''))
-             rec['city'] = st.text_input("City", rec.get('city', ''))
+             rec['contact_person'] = st.text_input("Contact Person", rec.get('contact_person', ''), key="cl_contact_person")
+             rec['city'] = st.text_input("City", rec.get('city', ''), key="cl_city")
          with r3:
-             rec['address'] = st.text_input("Street / Address", rec.get('address', ''))
-             cl['location'] = st.text_input("My Location (Date)", cl.get('location', ''))
+             rec['address'] = st.text_input("Street / Address", rec.get('address', ''), key="cl_address")
+             cl['location'] = st.text_input("My Location (Date)", cl.get('location', ''), key="cl_my_location")
          
          cl['recipient'] = rec
          

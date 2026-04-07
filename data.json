@@ -3,20 +3,20 @@
     "name": "Amjad Awad-Allah",
     "email": "amjad.awadallah93@gmail.com",
     "phone": "+49 163 9055276",
-    "url": "http://amjadawadallah.com",
-    "summary": "Softwareentwickler mit mehr als 4 Jahren Erfahrung in Android-Entwicklung. Aktuell in Umschulung zum Fachinformatiker (IHK). Suche ein 11-monatiges Pflichtpraktikum ab Juli 2026, um meine Fähigkeiten in realen Projekten im deutschen Markt einzubringen und zu vertiefen.",
+    "url": null,
+    "summary": "Softwareentwickler mit mehr als 4 Jahren Erfahrung in der Android- und Webentwicklung. Erfahrung in der Entwicklung performanter, skalierbarer Anwendungen sowie in der Umsetzung von Fullstack-Projekten.",
     "location": {
-      "city": "Essen",
-      "postalCode": "45307 "
+      "city": "45307 Essen",
+      "postalCode": ""
     },
     "profiles": [
       {
         "network": "LinkedIn",
-        "url": "https://linkedin.com/in/amjad-awad-allah"
+        "url": "linkedin.com/in/amjad-awad-allah"
       },
       {
         "network": "GitHub",
-        "url": "https://github.com/amjad-awad-allah"
+        "url": "github.com/amjad-awad-allah"
       }
     ]
   },
@@ -75,17 +75,23 @@
       "studyType": "Umschulung",
       "startDate": "2025",
       "endDate": "heute",
-      "courses": [],
-      "notes": "Umschulung nach IHK-Standard: Java, C#, SQL, Scrum, Spring Boot. IHK-Prüfung noch ausstehend. Pflichtpraktikum (11 Monate) ab Juli 2026."
+      "courses": [
+        "Java",
+        "C#",
+        "SQL",
+        "Scrum",
+        "Spring Boot"
+      ],
+      "notes": "Fokus auf praxisorientierte Softwareentwicklung und moderne Backend-Technologien."
     },
     {
       "institution": "Arab International University",
       "area": "Informatik – Schwerpunkt Künstliche Intelligenz",
-      "studyType": "Bachelor of Science (B.Sc.)",
+      "studyType": null,
       "startDate": "2012",
       "endDate": "2017",
       "courses": [],
-      "notes": "Abgeschlossen."
+      "notes": null
     }
   ],
   "skills": [
@@ -172,48 +178,48 @@
   "certificates": [
     {
       "name": "Junior Cybersecurity Analyst Career Path",
-      "issuer": "Cisco NA",
-      "date": "12.2025"
+      "issuer": "Cisco Networking Academy",
+      "date": "2025-12-01"
     },
     {
       "name": "Introduction to Cybersecurity",
       "issuer": "Cisco Networking Academy",
-      "date": "12.2025"
+      "date": "2025-12-01"
     },
     {
       "name": "Python Essentials 1",
       "issuer": "Cisco Networking Academy",
-      "date": "01.2026"
+      "date": "2026-01-01"
     },
     {
       "name": "JavaScript Essentials 1",
       "issuer": "Cisco Networking Academy",
-      "date": "12.2025"
+      "date": "2025-12-01"
     },
     {
       "name": "JavaScript Essentials 2",
       "issuer": "Cisco Networking Academy",
-      "date": "01.2026"
+      "date": "2026-01-01"
     },
     {
       "name": "Introduction to IoT",
       "issuer": "Cisco Networking Academy",
-      "date": "01.2026"
+      "date": "2026-01-01"
     },
     {
       "name": "Introduction to Modern AI",
       "issuer": "Cisco Networking Academy",
-      "date": "12.2025"
+      "date": "2025-12-01"
     },
     {
       "name": "Deutsch B2",
       "issuer": "Weststadt Akademie",
-      "date": "2025"
+      "date": "2025-01-01"
     },
     {
       "name": "Deutsch B1",
       "issuer": "DÜS Eckert",
-      "date": "2024"
+      "date": "2024-01-01"
     }
   ],
   "languages": [
@@ -223,11 +229,11 @@
     },
     {
       "language": "Deutsch",
-      "fluency": "B2 - berufliche Kommunikation möglich"
+      "fluency": "B2 – Berufliche Kommunikation möglich"
     },
     {
       "language": "Englisch",
-      "fluency": "Fortgeschritten - Verhandlungssicher"
+      "fluency": "Fortgeschritten – Verhandlungssicher"
     }
   ]
 }
