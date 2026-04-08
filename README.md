@@ -2,6 +2,8 @@
 
 An advanced, AI-powered application designed to transform unstructured text into professional, ATS-friendly CVs and tailored Cover Letters. Built with **Python**, **Streamlit**, and **Google Gemini 2.5/3.1**.
 
+### 🔗 [Live Demo - Try it now!](https://txtbewerbung.streamlit.app/)
+
 ## 🌟 Features
 
 - **🚀 Smart Extraction**: Upload your old CV (PDF/DOCX/TXT) or paste raw LinkedIn text. The AI extracts work history, skills, and education into a structured JSON Resume format.
@@ -45,12 +47,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 5. API Key Configuration
-Create a `.env` file in the root directory and add your key:
-```env
-GEMINI_API_KEY=your_google_ai_studio_key_here
-```
-*Alternatively, you can enter the key directly in the application sidebar.*
+### 5. API Configuration
+For local development, you can enter your API Key directly in the application sidebar. For production, set the `GEMINI_API_KEY` as an environment variable or via your hosting provider's "Secrets" manager.
 
 ## 🚀 Usage
 

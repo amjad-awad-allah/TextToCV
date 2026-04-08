@@ -15,9 +15,7 @@ def main():
     # 1. API Key abfragen, falls nicht gesetzt
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        print("Fehler: Bitte setzen Sie zuerst Ihren GEMINI_API_KEY.")
-        print("Beispiel (Windows Powershell): $env:GEMINI_API_KEY = \"Ihr_Schlüssel_Hier\"")
-        print("Beispiel (Linux/Mac): export GEMINI_API_KEY=\"Ihr_Schlüssel_Hier\"")
+        print("Fehler: Bitte setzen Sie Ihren GEMINI_API_KEY in den Umgebungsvariablen.")
         return
 
     # 2. Daten aus Rohtext extrahieren
