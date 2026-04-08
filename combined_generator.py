@@ -1,4 +1,5 @@
 import sys
+import os
 import json
 import datetime
 import docx
@@ -132,7 +133,7 @@ def add_dynamic_page_number(paragraph):
     run._r.append(fldChar3)
 
 def _build_header(doc, basics, include_photo=False):
-    # HEADER - Transparent Table with Photo Support
+    # HEADER - Left aligned to match CV/Letterhead
     header_table = doc.add_table(rows=1, cols=2)
     header_table.autofit = False
     header_table.columns[0].width = Inches(5.5)
@@ -140,6 +141,7 @@ def _build_header(doc, basics, include_photo=False):
     
     cell_left = header_table.cell(0, 0)
     p_left = cell_left.paragraphs[0]
+    p_left.alignment = WD_ALIGN_PARAGRAPH.LEFT
     p_left.paragraph_format.space_after = Pt(2)
     
     # 1. Name
@@ -180,25 +182,37 @@ def _build_header(doc, basics, include_photo=False):
     p_right = cell_right.paragraphs[0]
     p_right.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     
-    import os
-    if include_photo and os.path.exists("output/profile.jpg"):
+    # Use session photo if available
+    photo = basics.get("photo")
+    
+    if include_photo and photo:
+        import io
         try:
             r_pic = p_right.add_run()
-            r_pic.add_picture("output/profile.jpg", width=Inches(1.2))
+            if isinstance(photo, bytes):
+                r_pic.add_picture(io.BytesIO(photo), width=Inches(1.2))
+            elif os.path.exists(photo):
+                r_pic.add_picture(photo, width=Inches(1.2))
         except Exception as e:
             print(f"Error loading picture: {e}")
             
     doc.add_paragraph().paragraph_format.space_after = Pt(10)
 
-def generate_combined(cv_json_file="data.json", letter_json_file="cover_letter.json", output_file="Combined_Application.docx"):
-    try:
-        with open(cv_json_file, 'r', encoding='utf-8') as f:
-            cv_data = json.load(f)
-        with open(letter_json_file, 'r', encoding='utf-8') as f:
-            letter_data = json.load(f)
-    except Exception as e:
-        print(f"❌ Error loading files: {e}")
-        return
+def generate_combined(cv_data_input, letter_data_input, output_file="Combined_Application.docx"):
+    # Unified loading logic
+    if isinstance(cv_data_input, str):
+        try:
+            with open(cv_data_input, 'r', encoding='utf-8') as f:
+                cv_data = json.load(f)
+        except: return
+    else: cv_data = cv_data_input
+
+    if isinstance(letter_data_input, str):
+        try:
+            with open(letter_data_input, 'r', encoding='utf-8') as f:
+                letter_data = json.load(f)
+        except: return
+    else: letter_data = letter_data_input
 
     doc = Document()
     style = doc.styles['Normal']
@@ -236,15 +250,36 @@ def generate_combined(cv_json_file="data.json", letter_json_file="cover_letter.j
     # Recipient
     rec_p = doc.add_paragraph()
     rec_p.paragraph_format.space_after = Pt(15)
-    rec_text = f"{clean_markdown(recipient.get('company', ''))}\n{clean_markdown(recipient.get('contact_person', ''))}\n{clean_markdown(recipient.get('address', ''))}\n{clean_markdown(recipient.get('postal_code', ''))} {clean_markdown(recipient.get('city', ''))}"
-    rec_p.add_run(rec_text).font.size = Pt(10)
+    
+    company = clean_markdown(recipient.get('company', ''))
+    person = clean_markdown(recipient.get('contact_person', ''))
+    street = clean_markdown(recipient.get('address', ''))
+    postal = clean_markdown(recipient.get('postal_code', ''))
+    city_name = clean_markdown(recipient.get('city', ''))
+    city_full = f"{postal} {city_name}".strip()
+    
+    recipient_lines = [company, person, street, city_full]
+    seen = []
+    final_lines = []
+    for line in recipient_lines:
+        s = line.strip()
+        if s and s not in seen:
+            final_lines.append(s)
+            seen.append(s)
+            
+    rec_p.add_run("\n".join(final_lines)).font.size = Pt(10)
 
     # Date
     p_date = doc.add_paragraph()
     p_date.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     p_date.paragraph_format.space_after = Pt(20)
     now = datetime.datetime.now()
-    date_str = f"{clean_markdown(letter_data.get('location', basics.get('location', {}).get('city', 'Ort')))}, {now.strftime('%d.%m.%Y')}"
+    
+    city_raw = clean_markdown(letter_data.get('location', 'Essen'))
+    import re
+    city_only = re.sub(r'\d+', '', city_raw).strip(', ')
+    
+    date_str = f"{city_only}, {now.strftime('%d.%m.%Y')}"
     p_date.add_run(date_str).font.size = Pt(10)
 
     # Subject
@@ -256,11 +291,17 @@ def generate_combined(cv_json_file="data.json", letter_json_file="cover_letter.j
     run_sub.font.color.rgb = RGBColor(0, 51, 102)
 
     # Body
-    p_sal = doc.add_paragraph(clean_markdown(letter_data.get('salutation', 'Sehr geehrte Damen und Herren,')))
+    salutation_text = clean_markdown(letter_data.get('salutation', 'Sehr geehrte Damen und Herren,'))
+    p_sal = doc.add_paragraph(salutation_text)
     p_sal.paragraph_format.space_after = Pt(8)
 
-    for para in letter_data.get('paragraphs', []):
-        p_body = doc.add_paragraph(clean_markdown(para))
+    paragraphs = letter_data.get('paragraphs', [])
+    for i, para in enumerate(paragraphs):
+        text = clean_markdown(para)
+        if i == 0 and salutation_text.strip().endswith(',') and text:
+            text = text[0].lower() + text[1:] if len(text) > 0 else text
+            
+        p_body = doc.add_paragraph(text)
         p_body.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         p_body.paragraph_format.space_after = Pt(8)
         p_body.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE

@@ -26,20 +26,11 @@ if api_provider == "OpenAI":
 else:
     api_key = st.sidebar.text_input("Gemini API Key:", type="password", value=os.environ.get("GEMINI_API_KEY", ""))
 
-# Load existing JSON if available into session state so we don't lose it
-if 'cv_data' not in st.session_state and os.path.exists("data.json"):
-    try:
-        with open("data.json", "r", encoding="utf-8") as f:
-            st.session_state['cv_data'] = json.load(f)
-    except:
-        pass
-
-if 'cl_data' not in st.session_state and os.path.exists("cover_letter.json"):
-     try:
-         with open("cover_letter.json", "r", encoding="utf-8") as f:
-             st.session_state['cl_data'] = json.load(f)
-     except:
-         pass
+# Cleanup old persistent files from disk to ensure privacy/no-caching (as requested)
+for f in ["data.json", "cover_letter.json", "output/profile.jpg"]:
+    if os.path.exists(f):
+        try: os.remove(f)
+        except: pass
 
 # --- TABS ---
 tab1, tab2, tab3, tab4 = st.tabs([
@@ -66,15 +57,16 @@ with tab1:
             else:
                 with st.spinner(f"Extracting structured data using {api_provider}..."):
                     provider = 'openai' if api_provider == "OpenAI" else 'gemini'
-                    extracted_data = text_analyzer.analyze_cv_text(raw_cv_text, api_key, provider=provider)
-                    
-                    if extracted_data:
-                        st.success("Data successfully extracted! Go to Tab 2 to review and edit.")
-                        st.session_state['cv_data'] = extracted_data
-                        with open("data.json", "w", encoding="utf-8") as f:
-                            json.dump(extracted_data, f, indent=2, ensure_ascii=False)
-                    else:
-                        st.error("Error during extraction. Please verify your API Key.")
+                    try:
+                        extracted_data = text_analyzer.analyze_cv_text(raw_cv_text, api_key, provider=provider)
+                        
+                        if extracted_data:
+                            st.success("Data successfully extracted! Go to Tab 2 to review and edit.")
+                            st.session_state['cv_data'] = extracted_data
+                        else:
+                            st.error("Error during extraction. No data returned.")
+                    except Exception as e:
+                        st.error(f"❌ API Error: {str(e)}")
 
         if st.button("⭐ AI Profile Evaluation (HR-Feedback)", use_container_width=True):
             if not api_key:
@@ -98,11 +90,26 @@ with tab2:
         
         st.markdown("### Profile Picture (Bewerbungsfoto)")
         uploaded_file = st.file_uploader("Upload a professional photo (JPG/PNG) to include in your CV header:", type=['jpg', 'jpeg', 'png'])
-        if uploaded_file is not None:
-            with open("output/profile.jpg", "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            st.success("Profile picture saved! It will appear on your CV (but not on the Cover Letter).")
-        st.markdown("---")
+        
+        col_img1, col_img2 = st.columns([1, 1])
+        with col_img1:
+            if uploaded_file is not None:
+                # Store photo as bytes in session_state instead of on disk
+                st.session_state['photo_bytes'] = uploaded_file.getvalue()
+                # Update cv_data to include photo reference (bytes)
+                if 'cv_data' in st.session_state:
+                    st.session_state['cv_data']['basics']['photo'] = st.session_state['photo_bytes']
+                st.success("✅ Profile picture uploaded to session!")
+            
+            if 'photo_bytes' in st.session_state:
+                if st.button("🗑️ Remove Profile Picture"):
+                    if 'photo_bytes' in st.session_state: del st.session_state['photo_bytes']
+                    if 'cv_data' in st.session_state and 'photo' in st.session_state['cv_data']['basics']:
+                        del st.session_state['cv_data']['basics']['photo']
+                    st.rerun()
+        with col_img2:
+            if 'photo_bytes' in st.session_state:
+                st.image(st.session_state['photo_bytes'], width=100, caption="Current Photo")
         
         st.markdown("### Basics")
         basics = cv.get('basics', {})
@@ -176,10 +183,9 @@ with tab2:
                  skill['keywords'] = [k.strip() for k in edited_kw.split(',')]
                  
         if st.button("💾 Save CV Changes", use_container_width=True):
+             # Save directly to session state
              st.session_state['cv_data'] = cv
-             with open("data.json", "w", encoding="utf-8") as f:
-                 json.dump(cv, f, indent=2, ensure_ascii=False)
-             st.success("JSON data updated successfully! You can now export the CV.")
+             st.success("Changes saved for this session! You can now export the CV.")
 
 
 # --- TAB 3: COVER LETTER ---
@@ -201,15 +207,16 @@ with tab3:
              else:
                  with st.spinner("Analyzing match and writing tailored cover letter..."):
                      provider = 'openai' if api_provider == "OpenAI" else 'gemini'
-                     cl_data = text_analyzer.generate_cover_letter_data(st.session_state['cv_data'], job_description, api_key, provider=provider)
-                     
-                     if cl_data:
-                         st.success("Cover letter content generated! You can edit it below.")
-                         st.session_state['cl_data'] = cl_data
-                         with open("cover_letter.json", "w", encoding="utf-8") as f:
-                             json.dump(cl_data, f, indent=2, ensure_ascii=False)
-                     else:
-                         st.error("Error during generation.")
+                     try:
+                        cl_data = text_analyzer.generate_cover_letter_data(st.session_state['cv_data'], job_description, api_key, provider=provider)
+                        
+                        if cl_data:
+                            st.success("Cover letter content generated! You can edit it below.")
+                            st.session_state['cl_data'] = cl_data
+                        else:
+                            st.error("Error during generation. No data returned.")
+                     except Exception as e:
+                        st.error(f"❌ API Error: {str(e)}")
                          
         st.markdown("🔹 **OR**")
         
@@ -255,16 +262,14 @@ with tab3:
          
          if st.button("💾 Save Cover Letter Edits", use_container_width=True):
              st.session_state['cl_data'] = cl
-             with open("cover_letter.json", "w", encoding="utf-8") as f:
-                 json.dump(cl, f, indent=2, ensure_ascii=False)
-             st.success("Cover letter edits saved! You can now export it.")
+             st.success("Cover letter edits saved for this session! You can now export it.")
 
 # --- TAB 4: EXPORT ---
 with tab4:
     st.header("Export Documents")
     
-    cv_ready = os.path.exists("data.json")
-    cl_ready = os.path.exists("cover_letter.json")
+    cv_ready = 'cv_data' in st.session_state
+    cl_ready = 'cl_data' in st.session_state
     
     export_c1, export_c2, export_c3 = st.columns(3)
     
@@ -277,7 +282,7 @@ with tab4:
                  with st.spinner("Building Docx..."):
                      ts = time.strftime("%Y%m%d_%H%M%S")
                      fname = f"output/Resume_{ts}.docx"
-                     cv_generator.generate_cv("data.json", fname)
+                     cv_generator.generate_cv(st.session_state['cv_data'], fname)
                      st.session_state['out_cv'] = fname
                      st.success("Generated successfully!")
             if 'out_cv' in st.session_state:
@@ -296,7 +301,7 @@ with tab4:
                  with st.spinner("Building Docx..."):
                      ts = time.strftime("%Y%m%d_%H%M%S")
                      fname = f"output/CoverLetter_{ts}.docx"
-                     cover_letter_generator.generate_cover_letter("data.json", "cover_letter.json", fname)
+                     cover_letter_generator.generate_cover_letter(st.session_state['cv_data'], st.session_state['cl_data'], fname)
                      st.session_state['out_cl'] = fname
                      st.success("Generated successfully!")
             if 'out_cl' in st.session_state:
@@ -312,12 +317,12 @@ with tab4:
              st.warning("Both CV and Cover Letter must be generated.")
         else:
             if st.button("Generate Combined Doc", use_container_width=True):
-                 with st.spinner("Building Docx..."):
-                     ts = time.strftime("%Y%m%d_%H%M%S")
-                     fname = f"output/Application_{ts}.docx"
-                     combined_generator.generate_combined("data.json", "cover_letter.json", fname)
-                     st.session_state['out_combo'] = fname
-                     st.success("Generated successfully!")
+                  with st.spinner("Building Docx..."):
+                      ts = time.strftime("%Y%m%d_%H%M%S")
+                      fname = f"output/Application_{ts}.docx"
+                      combined_generator.generate_combined(st.session_state['cv_data'], st.session_state['cl_data'], fname)
+                      st.session_state['out_combo'] = fname
+                      st.success("Generated successfully!")
             if 'out_combo' in st.session_state:
                  path = st.session_state['out_combo']
                  with open(path, "rb") as f:

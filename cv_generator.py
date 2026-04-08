@@ -132,13 +132,17 @@ def add_dynamic_page_number(paragraph):
     run._r.append(fldChar3)
 
 
-def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
-    try:
-        with open(json_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-    except Exception as e:
-        print(f"❌ Error loading {json_file}: {e}")
-        return
+def generate_cv(data_input, output_file="Generated_CV.docx"):
+    # Allow passing either a file path or a dictionary
+    if isinstance(data_input, str):
+        try:
+            with open(data_input, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            print(f"❌ Error loading {data_input}: {e}")
+            return
+    else:
+        data = data_input
 
     doc = Document()
     style = doc.styles['Normal']
@@ -214,10 +218,18 @@ def generate_cv(json_file="data.json", output_file="Generated_CV.docx"):
     cell_right = header_table.cell(0, 1)
     p_right = cell_right.paragraphs[0]
     p_right.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    if os.path.exists("output/profile.jpg"):
+    
+    # Support for photo as bytes, file path, or 'output/profile.jpg'
+    photo = data.get("basics", {}).get("photo") or "output/profile.jpg"
+    
+    if photo:
+        import io
         try:
             r_pic = p_right.add_run()
-            r_pic.add_picture("output/profile.jpg", width=Inches(1.2))
+            if isinstance(photo, bytes):
+                r_pic.add_picture(io.BytesIO(photo), width=Inches(1.2))
+            elif os.path.exists(photo):
+                r_pic.add_picture(photo, width=Inches(1.2))
         except Exception as e:
             print(f"Error loading picture: {e}")
             

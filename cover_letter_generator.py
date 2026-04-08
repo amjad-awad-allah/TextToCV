@@ -64,15 +64,28 @@ def add_hyperlink(paragraph, url, text, bold=False, size=10, color='005b9f'):
     hyperlink.append(new_run)
     paragraph._p.append(hyperlink)
 
-def generate_cover_letter(cv_data_file="data.json", letter_data_file="cover_letter.json", output_file="Anschreiben.docx"):
-    try:
-        with open(cv_data_file, 'r', encoding='utf-8') as f:
-            cv_data = json.load(f)
-        with open(letter_data_file, 'r', encoding='utf-8') as f:
-            letter_data = json.load(f)
-    except Exception as e:
-        print(f"❌ Error loading files: {e}")
-        return
+def generate_cover_letter(cv_data_input, letter_data_input, output_file="Anschreiben.docx"):
+    # Allow passing either a file path or a dictionary for CV
+    if isinstance(cv_data_input, str):
+        try:
+            with open(cv_data_input, 'r', encoding='utf-8') as f:
+                cv_data = json.load(f)
+        except Exception as e:
+            print(f"❌ Error loading CV file: {e}")
+            return
+    else:
+        cv_data = cv_data_input
+
+    # Allow passing either a file path or a dictionary for Letter
+    if isinstance(letter_data_input, str):
+        try:
+            with open(letter_data_input, 'r', encoding='utf-8') as f:
+                letter_data = json.load(f)
+        except Exception as e:
+            print(f"❌ Error loading Letter file: {e}")
+            return
+    else:
+        letter_data = letter_data_input
 
     doc = Document()
     
@@ -93,10 +106,10 @@ def generate_cover_letter(cv_data_file="data.json", letter_data_file="cover_lett
     recipient = letter_data.get("recipient", {})
     
     # ==========================================
-    # LETTERHEAD (Identical Header to CV)
+    # LETTERHEAD (Left aligned like CV)
     # ==========================================
     p_header = doc.add_paragraph()
-    p_header.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_header.alignment = WD_ALIGN_PARAGRAPH.LEFT
     p_header.paragraph_format.space_after = Pt(20)
     p_header.paragraph_format.keep_together = True
     
@@ -140,9 +153,23 @@ def generate_cover_letter(cv_data_file="data.json", letter_data_file="cover_lett
     company = clean_markdown(recipient.get('company', ''))
     person = clean_markdown(recipient.get('contact_person', ''))
     street = clean_markdown(recipient.get('address', ''))
-    city = f"{clean_markdown(recipient.get('postal_code', ''))} {clean_markdown(recipient.get('city', ''))}"
     
-    rec_text = f"{company}\n{person}\n{street}\n{city}"
+    # Avoid duplicate city/postal code in rec_text
+    postal = clean_markdown(recipient.get('postal_code', ''))
+    city_name = clean_markdown(recipient.get('city', ''))
+    city_full = f"{postal} {city_name}".strip()
+    
+    recipient_lines = [company, person, street, city_full]
+    # Remove empty lines and duplicates (like city appearing twice)
+    seen = []
+    final_lines = []
+    for line in recipient_lines:
+        s = line.strip()
+        if s and s not in seen:
+            final_lines.append(s)
+            seen.append(s)
+            
+    rec_text = "\n".join(final_lines)
     r_rec = rec_p.add_run(rec_text)
     r_rec.font.size = Pt(10)
 
@@ -150,7 +177,14 @@ def generate_cover_letter(cv_data_file="data.json", letter_data_file="cover_lett
     p_date.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     p_date.paragraph_format.space_after = Pt(20)
     now = datetime.datetime.now()
-    date_str = f"{clean_markdown(letter_data.get('location', 'Essen'))}, den {now.strftime('%d.%m.%Y')}"
+    
+    # Format: "City, DD.MM.YYYY" (No postal code in date line per request)
+    city_raw = clean_markdown(letter_data.get('location', 'Essen'))
+    # Clean city_raw: remove digits and leading/trailing spaces/commas
+    import re
+    city_only = re.sub(r'\d+', '', city_raw).strip(', ')
+    
+    date_str = f"{city_only}, {now.strftime('%d.%m.%Y')}"
     run_date = p_date.add_run(date_str)
     run_date.font.size = Pt(10)
 
@@ -167,11 +201,21 @@ def generate_cover_letter(cv_data_file="data.json", letter_data_file="cover_lett
     # ==========================================
     # SALUTATION & BODY
     # ==========================================
-    p_sal = doc.add_paragraph(clean_markdown(letter_data.get('salutation', 'Sehr geehrte Damen und Herren,')))
+    salutation_text = clean_markdown(letter_data.get('salutation', 'Sehr geehrte Damen und Herren,'))
+    p_sal = doc.add_paragraph(salutation_text)
     p_sal.paragraph_format.space_after = Pt(8)
 
-    for para in letter_data.get('paragraphs', []):
-        p_body = doc.add_paragraph(clean_markdown(para))
+    paragraphs = letter_data.get('paragraphs', [])
+    for i, para in enumerate(paragraphs):
+        text = clean_markdown(para)
+        
+        # German rule: if salutation ends with comma, first paragraph starts with lowercase (if not a noun)
+        if i == 0 and salutation_text.strip().endswith(',') and text:
+            # We lowercase the first letter. Note: In German, nouns are uppercase, 
+            # but usually the AI starts with "ich" or "hiermit".
+            text = text[0].lower() + text[1:] if len(text) > 0 else text
+            
+        p_body = doc.add_paragraph(text)
         p_body.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         p_body.paragraph_format.space_after = Pt(8)
         p_body.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE

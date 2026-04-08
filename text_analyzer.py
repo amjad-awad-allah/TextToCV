@@ -46,8 +46,18 @@ Zu analysierender Text:
             content = response.choices[0].message.content.strip()
         else:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            response = model.generate_content(prompt)
+            try:
+                # Optimized for 2026: Using Gemini 2.5 Flash for fast CV extraction
+                model_name = 'gemini-2.5-flash'
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(prompt)
+            except Exception:
+                # Fallback to the latest generic flash alias
+                try:
+                    model = genai.GenerativeModel('gemini-flash-latest')
+                    response = model.generate_content(prompt)
+                except Exception as e2:
+                    raise Exception(f"All models failed. Latest error: {str(e2)}")
             content = response.text.strip()
             
         if content.startswith("```json"):
@@ -58,8 +68,7 @@ Zu analysierender Text:
         data = json.loads(content)
         return data
     except Exception as e:
-        print(f"Fehler bei der KI-Analyse: {e}")
-        return None
+        raise Exception(f"Fehler bei der KI-Analyse: {str(e)}")
 
 def generate_cover_letter_data(cv_data: dict, job_description: str, api_key: str, provider: str = 'gemini') -> Optional[dict]:
     prompt = f"""
@@ -134,8 +143,14 @@ Job-Beschreibung:
             content = response.choices[0].message.content.strip()
         else:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-1.5-pro-latest') # using pro for better text generation if available, or just flash
-            response = model.generate_content(prompt)
+            try:
+                # Using Gemini 2.5 Pro for high-quality cover letter generation
+                model = genai.GenerativeModel('gemini-2.5-pro')
+                response = model.generate_content(prompt)
+            except Exception:
+                # Fallback to 2.5 flash
+                model = genai.GenerativeModel('gemini-2.5-flash')
+                response = model.generate_content(prompt)
             content = response.text.strip()
             
         if content.startswith("```json"):
@@ -146,8 +161,7 @@ Job-Beschreibung:
         data = json.loads(content)
         return data
     except Exception as e:
-        print(f"Fehler bei der KI-Analyse des Anschreibens: {e}")
-        return None
+        raise Exception(f"Fehler bei der KI-Analyse des Anschreibens: {str(e)}")
 
 def rate_cv(cv_text: str, api_key: str, provider: str = 'openai') -> Optional[str]:
     prompt = f"""
