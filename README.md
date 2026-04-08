@@ -1,62 +1,82 @@
-# AI CV & Cover Letter Generator 🚀
+# 📄 AI CV & Cover Letter Generator (2026 Edition)
 
-A professional Python-based tool that uses Artificial Intelligence to automatically generate perfectly formatted, **ATS-friendly** CVs and Cover Letters in `.docx` format.
+An advanced, AI-powered application designed to transform unstructured text into professional, ATS-friendly CVs and tailored Cover Letters. Built with **Python**, **Streamlit**, and **Google Gemini 2.5/3.1**.
 
-You can input unstructured raw text (e.g., from an old CV or a LinkedIn profile), and the tool will structure it, match it against a job description, and output beautifully formatted Word documents that meet professional standards (including German DIN 5008).
+## 🌟 Features
 
-## 🌟 Key Features
-- **Modern Web UI**: A clean, intuitive graphical interface powered by `Streamlit`.
-- **Multi-AI Support**: Automatically chooses between **OpenAI (e.g., GPT-4o-mini)** and **Google Gemini** based on the API key you provide.
-- **ATS-Optimized Formatting**: Generates `.docx` files without complex tables or text boxes, ensuring 100% readability by Applicant Tracking Systems (ATS).
-- **Smart Cover Letters**: Analyzes your CV alongside a given Job Description to generate a tailored, high-impact Cover Letter.
-- **CV Rating & HR Feedback**: Instantly rate your raw CV text using AI and get constructive HR-style feedback and a score out of 10.
-- **Smart File Management**: Automatically saves all generated files in an `output/` directory with unique timestamped filenames (e.g., `Lebenslauf_20260406_1702.docx`) to prevent overwrites.
-- **Direct Word Integration**: One-click button to automatically open the generated `.docx` file in Microsoft Word straight from your browser.
-- **DIN 5008 Compliant**: Margins and spacings are optimized for German corporate standards while keeping the documents concise to avoid exceeding page limits.
+- **🚀 Smart Extraction**: Upload your old CV (PDF/DOCX/TXT) or paste raw LinkedIn text. The AI extracts work history, skills, and education into a structured JSON Resume format.
+- **✉️ Tailored Cover Letters**: Generate German-standard (DIN 5008) cover letters automatically matched to a specific job description.
+- **🖼️ Photo Support**: Add a professional profile picture with real-time preview and memory-only storage.
+- **🔒 Privacy First**: Zero persistent storage. All data is handled in memory (Session State) and cleared when you close the browser. No more caching issues!
+- **🧐 HR Evaluation**: Get expert feedback on your profile and suggestions for improvement.
+- **📑 Multinational Export**: Export as standalone CV, Cover Letter, or a combined application package in `.docx` format.
+- **🏷️ Version Tracking**: Easily track updates via `version.py` displayed in the app sidebar.
 
-## ⚙️ Installation
+## 🛠️ Tech Stack
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/amjad-awad-allah/cvscript.git
-   cd cvscript
-   ```
-2. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-   *(This will install everything you need, including `streamlit`, `openai`, `google-generativeai`, and `python-docx`)*
+- **Frontend**: Streamlit
+- **AI Models**: Google Gemini 2.5 Flash/Pro (with 3.1 fallback)
+- **Document Engine**: Python-Docx
+- **Parsing**: PyPDF2, python-docx
+
+## 📋 Installation
+
+### 1. Prerequisites
+Ensure you have **Python 3.10+** installed.
+
+### 2. Clone the Repository
+```bash
+git clone https://github.com/your-username/TextToCV.git
+cd TextToCV
+```
+
+### 3. Set Up Environment
+It is recommended to use a virtual environment:
+```bash
+python -m venv venv
+# Windows
+.\venv\Scripts\activate
+# Linux/Mac
+source venv/bin/activate
+```
+
+### 4. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 5. API Key Configuration
+Create a `.env` file in the root directory and add your key:
+```env
+GEMINI_API_KEY=your_google_ai_studio_key_here
+```
+*Alternatively, you can enter the key directly in the application sidebar.*
 
 ## 🚀 Usage
 
-### 1. Starting the Application
-The easiest way to use the generator is through its modern web interface. Start it by running:
+Start the application using Streamlit:
 ```bash
-python -m streamlit run app.py
+streamlit run app.py
 ```
-*(This will automatically open the application in your default web browser).*
 
-### 2. Generating a CV
-1. Enter your API Key (OpenAI or Gemini) in the sidebar.
-2. Paste your raw, unstructured CV text into the provided text area.
-3. (Optional) Click **"⭐ Rohtext Bewerten"** to get a quick AI review and rating of your CV text before proceeding.
-4. Click **"🚀 CV Daten Extrahieren"** (Extract CV Data). The AI will structure your text automatically.
-5. Click **"📄 Word-Lebenslauf (.docx) Generieren"** to create your ATS-friendly CV.
-6. Download the file, or click **"📂 Lebenslauf in Word öffnen (Windows)"** to open it immediately.
+### Workflow:
+1. **🔍 Extraction**: Upload your file or paste text. Click "Extract" to see the magic.
+2. **✍️ CV Editor**: Review and edit the extracted data (Basics, Work, Skills, etc.).
+3. **✉️ Cover Letter**: Paste a job description to generate a tailored letter.
+4. **💾 Export**: Download your final documents as high-quality Word files.
 
-### 3. Generating a Cover Letter
-1. After extracting your CV data, paste the target **Job Description** in the Cover Letter section.
-2. Click **"✉️ AI Anschreiben-Daten generieren"** to have the AI write a highly targeted cover letter.
-3. Click **"📝 Anschreiben-Word (.docx) Generieren"** to securely generate the final cover letter document.
-4. Open the downloaded file or click to open directly in Word.
+## 📐 Formatting Standards (German Market)
 
-## 🧩 Project Structure
-- `app.py`: The main Streamlit Web Application module.
-- `text_analyzer.py`: The AI integration module handling API calls for parsing, rating, and generating cover letters.
-- `cv_generator.py`: Converts structured JSON data into an ATS-friendly `.docx` CV.
-- `cover_letter_generator.py`: Converts JSON data into a properly formatted `.docx` Cover Letter.
-- `output/`: Folder containing your timestamped generated `.docx` files.
-- `data.json` & `cover_letter.json`: The intermediate structured data files generated by the AI integrations.
+The generator follows strict German professional standards:
+- **CV**: Modern 1-2 page layout with photo support and Calibri typography.
+- **Cover Letter**:
+  - Salutation followed by comma (DIN 5008).
+  - First paragraph starts with a lowercase letter (if grammatically appropriate).
+  - Date format: `City, DD.MM.YYYY`.
+  - Left-aligned header for consistency.
 
-## 📄 License
-MIT License
+## 🤝 Contributing
+Feel free to open issues or submit pull requests to improve the templates or AI prompts.
+
+---
+*Created in 2026 for the next generation of job seekers.*

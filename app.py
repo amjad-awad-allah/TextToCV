@@ -6,6 +6,8 @@ import text_analyzer
 import cv_generator
 import cover_letter_generator
 import combined_generator
+import file_utils
+import version
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -26,6 +28,11 @@ if api_provider == "OpenAI":
 else:
     api_key = st.sidebar.text_input("Gemini API Key:", type="password", value=os.environ.get("GEMINI_API_KEY", ""))
 
+st.sidebar.markdown("---")
+st.sidebar.caption(f"🚀 Version: **{version.VERSION}**")
+st.sidebar.caption(f"📅 Last Update: {version.LAST_UPDATED}")
+st.sidebar.caption("Made with ❤️ in 2026")
+
 # Cleanup old persistent files from disk to ensure privacy/no-caching (as requested)
 for f in ["data.json", "cover_letter.json", "output/profile.jpg"]:
     if os.path.exists(f):
@@ -42,12 +49,27 @@ tab1, tab2, tab3, tab4 = st.tabs([
 
 # --- TAB 1: EXTRACTION ---
 with tab1:
-    st.header("Extract Data from Raw Text")
+    st.header("Extract Data from Original CV")
     col1, col2 = st.columns([1.5, 1])
     with col1:
-        raw_cv_text = st.text_area("Paste your unstructured CV or LinkedIn profile here:", height=300)
+        st.subheader("Option A: Upload CV File")
+        uploaded_cv = st.file_uploader("Upload your existing CV (PDF, DOCX, TXT):", type=['pdf', 'docx', 'txt'])
+        
+        st.subheader("Option B: Paste Text Manually")
+        raw_cv_text = st.text_area("Or paste your unstructured CV / LinkedIn text here:", height=200)
+
+        # Trigger extraction from file if uploaded
+        if uploaded_cv:
+            with st.spinner("Extracting text from file..."):
+                extracted_file_text = file_utils.extract_text_from_file(uploaded_cv)
+                if not extracted_file_text.startswith("Error") and extracted_file_text != "Unsupported file format.":
+                    raw_cv_text = extracted_file_text
+                    st.success(f"Successfully extracted text from {uploaded_cv.name}!")
+                else:
+                    st.error(extracted_file_text)
     with col2:
-        st.info("💡 **Tip:** You can paste mixed experiences from various documents. The AI will format everything automatically.")
+        st.info("💡 **Tip:** Uploading your old CV is the fastest way to start. The AI will understand the structure automatically.")
+
         
         if st.button("🚀 Extract CV Data", use_container_width=True):
             if not api_key:
@@ -112,7 +134,10 @@ with tab2:
                     st.rerun()
         with col_img2:
             if 'photo_bytes' in st.session_state:
-                st.image(st.session_state['photo_bytes'], width=100, caption="Current Photo")
+                import base64
+                img_b64 = base64.b64encode(st.session_state['photo_bytes']).decode()
+                st.markdown(f'<img src="data:image/jpeg;base64,{img_b64}" width="100" style="border-radius: 5px;">', unsafe_allow_html=True)
+                st.caption("Current Photo")
         
         st.markdown("### Basics")
         basics = cv.get('basics', {})
