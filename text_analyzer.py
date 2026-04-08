@@ -113,7 +113,7 @@ Gebe die Antwort NUR im folgenden JSON-Format aus:
   }},
   "location": "Wohnort des Kandidaten (aus CV)",
   "subject": "Betreff: Bewerbung als [Position]",
-  "salutation": "Sehr geehrte(r)...",
+  "salutation": "Sehr geehrte(r) [Name], (Always end with a comma)",
   "paragraphs": [
     "Einleitung...",
     "Hauptteil 1...",
@@ -189,8 +189,12 @@ Lebenslauf-Text:
         else:
             import google.generativeai as genai
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            response = model.generate_content(prompt)
+            try:
+                model = genai.GenerativeModel('gemini-2.5-flash')
+                response = model.generate_content(prompt)
+            except Exception:
+                model = genai.GenerativeModel('gemini-flash-latest')
+                response = model.generate_content(prompt)
             return response.text.strip()
     except Exception as e:
         print(f"Fehler bei der Bewertung: {e}")

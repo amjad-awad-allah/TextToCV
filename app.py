@@ -76,8 +76,11 @@ with tab1:
             else:
                  with st.spinner("Generating expert feedback..."):
                     provider = 'openai' if api_provider == "OpenAI" else 'gemini'
-                    rating = text_analyzer.rate_cv(raw_cv_text, api_key, provider=provider)
-                    st.info(rating)
+                    try:
+                        rating = text_analyzer.rate_cv(raw_cv_text, api_key, provider=provider)
+                        st.info(rating)
+                    except Exception as e:
+                        st.error(f"❌ API Error: {str(e)}")
 
 
 # --- TAB 2: EDITOR ---
