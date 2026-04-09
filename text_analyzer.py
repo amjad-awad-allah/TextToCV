@@ -3,6 +3,7 @@ import json
 import google.generativeai as genai
 from openai import OpenAI
 from typing import Optional
+import time
 
 def analyze_cv_text(text: str, api_key: str, provider: str = 'gemini') -> Optional[dict]:
     """
@@ -32,39 +33,48 @@ Zu analysierender Text:
 ---
 """
 
-    try:
-        if provider == 'openai':
-            client = OpenAI(api_key=api_key)
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "Du bist ein Experte für die Extraktion von Daten aus Lebensläufen. Antworte NUR mit validem JSON."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.2
-            )
-            content = response.choices[0].message.content.strip()
-        else:
-            genai.configure(api_key=api_key)
-            try:
-                # Optimized for 2026: Using Gemini 2.5 Flash for fast CV extraction
-                model_name = 'gemini-2.5-flash'
-                model = genai.GenerativeModel(model_name)
-                response = model.generate_content(prompt)
-            except Exception:
-                # Fallback to the latest generic flash alias
+    for attempt in range(3):
+        try:
+            if provider == 'openai':
+                client = OpenAI(api_key=api_key)
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "Du bist ein Experte für die Extraktion von Daten aus Lebensläufen. Antworte NUR mit validem JSON."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.2
+                )
+                content = response.choices[0].message.content.strip()
+            else:
+                genai.configure(api_key=api_key)
                 try:
-                    model = genai.GenerativeModel('gemini-flash-latest')
+                    # Optimized for 2026: Using Gemini 2.5 Flash for fast CV extraction
+                    model_name = 'gemini-2.5-flash'
+                    model = genai.GenerativeModel(model_name)
                     response = model.generate_content(prompt)
-                except Exception as e2:
-                    raise Exception(f"All models failed. Latest error: {str(e2)}")
-            content = response.text.strip()
-            
-        if content.startswith("```json"):
-            content = content[7:-3].strip()
-        elif content.startswith("```"):
-            content = content[3:-3].strip()
-            
+                except Exception:
+                    # Fallback to the latest generic flash alias
+                    try:
+                        model = genai.GenerativeModel('gemini-flash-latest')
+                        response = model.generate_content(prompt)
+                    except Exception as e2:
+                        raise Exception(f"All models failed. Latest error: {str(e2)}")
+                content = response.text.strip()
+            break # Success
+        except Exception as e:
+            if "429" in str(e) or "quota" in str(e).lower():
+                if attempt < 2:
+                    time.sleep(5 * (attempt + 1)) # Wait 5, 10 seconds
+                    continue
+            raise e
+        
+    if content.startswith("```json"):
+        content = content[7:-3].strip()
+    elif content.startswith("```"):
+        content = content[3:-3].strip()
+        
+    try:
         data = json.loads(content)
         return data
     except Exception as e:
@@ -129,35 +139,44 @@ Lebenslauf Daten (CV):
 Job-Beschreibung:
 {job_description}
 """
+    for attempt in range(3):
+        try:
+            if provider == 'openai':
+                client = OpenAI(api_key=api_key)
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "Du bist ein Karrierespezialist. Antworte NUR im validen JSON-Format."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.7
+                )
+                content = response.choices[0].message.content.strip()
+            else:
+                genai.configure(api_key=api_key)
+                try:
+                    # Using Gemini 2.5 Pro for high-quality cover letter generation
+                    model = genai.GenerativeModel('gemini-2.5-pro')
+                    response = model.generate_content(prompt)
+                except Exception:
+                    # Fallback to 2.5 flash
+                    model = genai.GenerativeModel('gemini-2.5-flash')
+                    response = model.generate_content(prompt)
+                content = response.text.strip()
+            break # Success
+        except Exception as e:
+            if "429" in str(e) or "quota" in str(e).lower():
+                if attempt < 2:
+                    time.sleep(5 * (attempt + 1))
+                    continue
+            raise e
+            
+    if content.startswith("```json"):
+        content = content[7:-3].strip()
+    elif content.startswith("```"):
+        content = content[3:-3].strip()
+        
     try:
-        if provider == 'openai':
-            client = OpenAI(api_key=api_key)
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "Du bist ein Karrierespezialist. Antworte NUR im validen JSON-Format."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.7
-            )
-            content = response.choices[0].message.content.strip()
-        else:
-            genai.configure(api_key=api_key)
-            try:
-                # Using Gemini 2.5 Pro for high-quality cover letter generation
-                model = genai.GenerativeModel('gemini-2.5-pro')
-                response = model.generate_content(prompt)
-            except Exception:
-                # Fallback to 2.5 flash
-                model = genai.GenerativeModel('gemini-2.5-flash')
-                response = model.generate_content(prompt)
-            content = response.text.strip()
-            
-        if content.startswith("```json"):
-            content = content[7:-3].strip()
-        elif content.startswith("```"):
-            content = content[3:-3].strip()
-            
         data = json.loads(content)
         return data
     except Exception as e:
@@ -174,28 +193,34 @@ Lebenslauf-Text:
 {cv_text}
 """
     try:
-        if provider == 'openai':
-            from openai import OpenAI
-            client = OpenAI(api_key=api_key)
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "Du bist ein HR-Experte auf Deutsch."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.7
-            )
-            return response.choices[0].message.content.strip()
-        else:
-            import google.generativeai as genai
-            genai.configure(api_key=api_key)
+        for attempt in range(3):
             try:
-                model = genai.GenerativeModel('gemini-2.5-flash')
-                response = model.generate_content(prompt)
-            except Exception:
-                model = genai.GenerativeModel('gemini-flash-latest')
-                response = model.generate_content(prompt)
-            return response.text.strip()
+                if provider == 'openai':
+                    client = OpenAI(api_key=api_key)
+                    response = client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[
+                            {"role": "system", "content": "Du bist ein HR-Experte auf Deutsch."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0.7
+                    )
+                    return response.choices[0].message.content.strip()
+                else:
+                    genai.configure(api_key=api_key)
+                    try:
+                        model = genai.GenerativeModel('gemini-2.5-flash')
+                        response = model.generate_content(prompt)
+                    except Exception:
+                        model = genai.GenerativeModel('gemini-flash-latest')
+                        response = model.generate_content(prompt)
+                    return response.text.strip()
+            except Exception as e:
+                if "429" in str(e) or "quota" in str(e).lower():
+                    if attempt < 2:
+                        time.sleep(5 * (attempt + 1))
+                        continue
+                raise e
     except Exception as e:
         print(f"Fehler bei der Bewertung: {e}")
         return "Fehler bei der KI-Bewertung."
