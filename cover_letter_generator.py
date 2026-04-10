@@ -184,7 +184,12 @@ def generate_cover_letter(cv_data_input, letter_data_input, output_file="Anschre
     import re
     city_only = re.sub(r'\d+', '', city_raw).strip(', ')
     
-    date_str = f"{city_only}, {now.strftime('%d.%m.%Y')}"
+    lang = cv_data.get("language", "de").lower()
+    if lang.startswith("en"):
+        date_str = f"{city_only}, {now.strftime('%m/%d/%Y')}"
+    else:
+        date_str = f"{city_only}, {now.strftime('%d.%m.%Y')}"
+    
     run_date = p_date.add_run(date_str)
     run_date.font.size = Pt(10)
 
@@ -209,8 +214,8 @@ def generate_cover_letter(cv_data_input, letter_data_input, output_file="Anschre
     for i, para in enumerate(paragraphs):
         text = clean_markdown(para)
         
-        # German rule: if salutation ends with comma, first paragraph starts with lowercase (if not a noun)
-        if i == 0 and salutation_text.strip().endswith(',') and text:
+        # German rule: if salutation ends with comma, first paragraph starts with lowercase
+        if i == 0 and salutation_text.strip().endswith(',') and text and not lang.startswith("en"):
             # We lowercase the first letter. Note: In German, nouns are uppercase, 
             # but usually the AI starts with "ich" or "hiermit".
             text = text[0].lower() + text[1:] if len(text) > 0 else text

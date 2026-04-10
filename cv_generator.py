@@ -84,12 +84,16 @@ def add_bullet(doc, text, font_size=10, indent=0.35, space_after=1):
     run_text.font.size = Pt(font_size)
     return p
 
-def format_date(date_str):
+def format_date(date_str, lang="de"):
     if not date_str: return ""
     date_str = str(date_str).strip()
-    if date_str.lower() in ["heute", "today", "present"]: return "heute"
+    heute = "Present" if "en" in lang.lower() else "heute"
+    if date_str.lower() in ["heute", "today", "present"]: return heute
     parts = date_str.split('-')
-    if len(parts) == 2: return f"{parts[1]}.{parts[0]}"
+    if len(parts) == 2: 
+        if "en" in lang.lower():
+            return f"{parts[1]}/{parts[0]}"
+        return f"{parts[1]}.{parts[0]}"
     if len(parts) == 1 and len(parts[0]) == 4: return parts[0]
     return date_str
 
@@ -149,6 +153,33 @@ def generate_cv(data_input, output_file="Generated_CV.docx"):
     style.font.name = 'Calibri'
     style.font.size = Pt(10.5)
     
+    # Language strings
+    lang = data.get("language", "de").lower()
+    if lang.startswith("en"):
+        t = {
+            'page': 'Page ',
+            'profile': 'Profile',
+            'work': 'Work Experience',
+            'edu': 'Education',
+            'skills': 'Technical Skills',
+            'projects': 'Projects',
+            'certs': 'Certificates & Training',
+            'langs': 'Languages',
+            'present': 'Present'
+        }
+    else:
+        t = {
+            'page': 'Seite ',
+            'profile': 'Profil',
+            'work': 'Berufserfahrung',
+            'edu': 'Ausbildung',
+            'skills': 'Technische Kenntnisse',
+            'projects': 'Projekte',
+            'certs': 'Zertifikate & Weiterbildung',
+            'langs': 'Sprachen',
+            'present': 'heute'
+        }
+
     # Page setup (DIN 5008 approx)
     for section in doc.sections:
         section.page_width = Mm(210)
@@ -166,7 +197,7 @@ def generate_cv(data_input, output_file="Generated_CV.docx"):
         r = p.add_run()
         r.font.size = Pt(8.5)
         r.font.color.rgb = RGBColor(120, 120, 120)
-        r.add_text("Seite ")
+        r.add_text(t['page'])
         add_dynamic_page_number(p)
 
     basics = data.get("basics", {})
@@ -238,7 +269,7 @@ def generate_cv(data_input, output_file="Generated_CV.docx"):
     # PROFIL
     summary = basics.get("summary", "")
     if summary:
-        add_section_heading(doc, 'Profil')
+        add_section_heading(doc, t['profile'])
         ps = doc.add_paragraph(clean_markdown(summary))
         ps.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         ps.paragraph_format.space_after = Pt(2)
@@ -249,7 +280,7 @@ def generate_cv(data_input, output_file="Generated_CV.docx"):
     # BERUFSERFAHRUNG
     work_items = data.get("work", [])
     if work_items:
-        add_section_heading(doc, 'Berufserfahrung')
+        add_section_heading(doc, t['work'])
         for job in work_items:
             p = doc.add_paragraph()
             p.paragraph_format.space_after = Pt(1)
@@ -264,7 +295,7 @@ def generate_cv(data_input, output_file="Generated_CV.docx"):
             tab_stops = p.paragraph_format.tab_stops
             tab_stops.add_tab_stop(Mm(165), WD_TAB_ALIGNMENT.RIGHT)
             
-            date_str = f"{format_date(job.get('startDate', ''))} – {format_date(job.get('endDate', 'heute'))}"
+            date_str = f"{format_date(job.get('startDate', ''), lang)} – {format_date(job.get('endDate', t['present']), lang)}"
             r_date = p.add_run(f"\t{date_str}")
             r_date.italic = True
             r_date.font.color.rgb = RGBColor(90, 90, 90)
@@ -277,7 +308,7 @@ def generate_cv(data_input, output_file="Generated_CV.docx"):
     # AUSBILDUNG
     edu_items = data.get("education", [])
     if edu_items:
-        add_section_heading(doc, 'Ausbildung')
+        add_section_heading(doc, t['edu'])
         for edu in edu_items:
             p = doc.add_paragraph()
             p.paragraph_format.space_after = Pt(1)
@@ -291,7 +322,7 @@ def generate_cv(data_input, output_file="Generated_CV.docx"):
             
             tab_stops = p.paragraph_format.tab_stops
             tab_stops.add_tab_stop(Mm(165), WD_TAB_ALIGNMENT.RIGHT)
-            date_str = f"{format_date(edu.get('startDate', ''))} – {format_date(edu.get('endDate', ''))}"
+            date_str = f"{format_date(edu.get('startDate', ''), lang)} – {format_date(edu.get('endDate', ''), lang)}"
             r_date = p.add_run(f"\t{date_str}")
             r_date.italic = True
             r_date.font.color.rgb = RGBColor(90, 90, 90)
@@ -304,7 +335,7 @@ def generate_cv(data_input, output_file="Generated_CV.docx"):
     # PROJEKTE
     proj_items = data.get("projects", [])
     if proj_items:
-        add_section_heading(doc, 'Projekte')
+        add_section_heading(doc, t['projects'])
         for proj in proj_items:
             p = doc.add_paragraph()
             p.paragraph_format.space_after = Pt(1)
@@ -339,7 +370,7 @@ def generate_cv(data_input, output_file="Generated_CV.docx"):
     # TECHNISCHE KENNTNISSE
     skills_items = data.get("skills", [])
     if skills_items:
-        add_section_heading(doc, 'Technische Kenntnisse')
+        add_section_heading(doc, t['skills'])
         for skill in skills_items:
             p = doc.add_paragraph()
             p.paragraph_format.space_after = Pt(1)
@@ -356,12 +387,12 @@ def generate_cv(data_input, output_file="Generated_CV.docx"):
     # ZERTIFIKATE (1 column)
     cert_items = data.get("certificates", [])
     if cert_items:
-        add_section_heading(doc, 'Zertifikate & Weiterbildung')
+        add_section_heading(doc, t['certs'])
         for c in cert_items:
             if isinstance(c, dict):
                 text = f"{clean_markdown(c.get('name', ''))} – {clean_markdown(c.get('issuer', ''))}"
                 if c.get('date'):
-                    formatted_date = format_date(c.get('date'))
+                    formatted_date = format_date(c.get('date'), lang)
                     text += f" ({formatted_date})"
                 add_bullet(doc, text, font_size=9.5, indent=0.15, space_after=1)
             else:
@@ -370,7 +401,7 @@ def generate_cv(data_input, output_file="Generated_CV.docx"):
     # SPRACHEN (1 column)
     lang_items = data.get("languages", [])
     if lang_items:
-        add_section_heading(doc, 'Sprachen')
+        add_section_heading(doc, t['langs'])
         for i, l in enumerate(lang_items):
             if isinstance(l, dict):
                 text = f"{clean_markdown(l.get('language', ''))}: {clean_markdown(l.get('fluency', ''))}"

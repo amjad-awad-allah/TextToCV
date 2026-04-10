@@ -16,9 +16,10 @@ Deine Aufgabe ist es, den unten stehenden Text zu lesen und in ein präzises JSO
 Regeln:
 1. Extrahiere persönliche Informationen, Berufserfahrung, Ausbildung, Fähigkeiten, Projekte, Sprachen und Zertifikate.
 2. Wenn du Links findest (LinkedIn, GitHub, Webseite), setze sie an die richtige Stelle.
-3. Behalte die Sprache des Textes bei (wenn der Text auf Deutsch ist, extrahiere die Daten auf Deutsch).
-4. Antworte **NUR** mit validem JSON-Code, ohne zusätzlichen Text oder Einleitungen.
+3. BEHALTE DIE SPRACHE DES TEXTES STRENG BEI. Wenn der Text auf Englisch ist, MÜSSEN die extrahierten Daten auf Englisch sein. Wenn der Text auf Deutsch ist, auf Deutsch. Erkenne die Sprache automatisch.
+4. Antworte **NUR** mit validem JSON-Code, ohne zusätzlichen Text, ohne Markdown und ohne Kommentare. Keine Trailing-Commas! Der Schlüssel "language" muss den Code der erkannten Sprache enthalten (z.B. "en" oder "de").
 5. Erforderliche Struktur:
+   - language: "en" 
    - basics: {{ name, email, phone, url, summary, location, profiles: [{{ network, url }}] }}
    - work: [{{ name, position, startDate, endDate, highlights: [] }}]
    - education: [{{ institution, area, studyType, startDate, endDate, courses: [], notes }}]
@@ -82,25 +83,30 @@ Zu analysierender Text:
 
 def generate_cover_letter_data(cv_data: dict, job_description: str, api_key: str, provider: str = 'gemini') -> Optional[dict]:
     prompt = f"""
-Act as a professional German Career Coach Expert and formal cover letter writer.
+Act as a professional Career Coach Expert and formal cover letter writer.
 
-Your task is to write an "Anschreiben" (Cover Letter) in German or the language of the job advertisement, based on the provided data.
+Your task is to write a Cover Letter based on the provided CV data and Job Description.
+
+CRITICAL LANGUAGE RULE: The cover letter MUST be written entirely in the EXACT SAME language as the provided Job Description. 
+- If the Job Description is in English, you MUST write the entire cover letter in English.
+- If the Job Description is in German, you MUST write the entire cover letter in German.
+IGNORE the language of the CV data when deciding the writing language. ALWAYS match the Job Description language.
 
 ⚠️ Strictly follow these rules:
 
 1. Structure:
-- Follow a modern professional German cover letter structure (without the full DIN 5008 header formatting).
-- Salutation (Anrede): Use a specific name only if explicitly mentioned in the job description, otherwise use "Sehr geehrtes Recruiting-Team".
-- First Paragraph (Motivation): Clearly explain why this specific company and this specific role. Do NOT start with "Hiermit bewerbe ich mich".
+- Follow a modern professional cover letter structure.
+- Salutation (Anrede): Use a specific name only if explicitly mentioned in the job description, otherwise use the standard salutation for the respective language (e.g., "Sehr geehrtes Recruiting-Team" in German or "Dear Hiring Manager" in English).
+- First Paragraph (Motivation): Clearly explain why this specific company and this specific role. Do NOT start with generic phrases.
 - Second Paragraph (Experience): Mention real practical experience with clear examples and technologies used.
 - Third Paragraph (Skill Matching): Directly connect the candidate's skills to the job requirements and demonstrate the ability to learn quickly.
 - Last Paragraph (Closing): Mention availability and express a strong desire for an interview.
 - Mention salary expectations ONLY if explicitly requested in the job description.
-- Close with "Mit freundlichen Grüßen".
+- Close with the standard closing for the respective language (e.g., "Mit freundlichen Grüßen" or "Sincerely").
 - Do not repeat the same idea across different paragraphs.
 
 2. Content & Tone:
-- Use formal and professional German language (B2-C1 level).
+- Use formal and professional language appropriate to the detected language.
 - Do not use generic phrases or clichés.
 - Use ONLY information provided in the CV and the Job Description (Do NOT invent or hallucinate data).
 - Focus on achievements and business impact rather than just listing tasks.
@@ -111,32 +117,40 @@ Your task is to write an "Anschreiben" (Cover Letter) in German or the language 
 - Naturally integrate keywords from the job advertisement.
 - Optimize the text to be ATS-friendly.
 - Use short, clear paragraphs without bullet points.
-Gebe die Antwort NUR im folgenden JSON-Format aus:
+
+4. JSON Formatting:
+- Provide ONLY valid JSON.
+- The "language" key MUST be the detected language code matching your content (e.g., "en" or "de").
+- NO trailing commas.
+- NO comments inside the JSON.
+
+Output the response ONLY in exactly this JSON format:
 
 {{
+  "language": "en",
   "recipient": {{
-    "company": "Firmenname",
-    "contact_person": "Ansprechpartner laut Job-Beschreibung (oder 'Recruiting-Team')",
-    "address": "Adresse",
-    "postal_code": "PLZ",
-    "city": "Stadt"
+    "company": "Company Name",
+    "contact_person": "Contact Person",
+    "address": "Address",
+    "postal_code": "12345",
+    "city": "City"
   }},
-  "location": "Wohnort des Kandidaten (aus CV)",
-  "subject": "Betreff: Bewerbung als [Position]",
-  "salutation": "Sehr geehrte(r) [Name], (Always end with a comma)",
+  "location": "Candidate Location",
+  "subject": "Subject",
+  "salutation": "Salutation",
   "paragraphs": [
-    "Einleitung...",
-    "Hauptteil 1...",
-    "Hauptteil 2...",
-    "Schluss..."
+    "Introduction...",
+    "Body 1...",
+    "Body 2...",
+    "Conclusion..."
   ],
-  "closing": "Mit freundlichen Grüßen"
+  "closing": "Closing"
 }}
 
-Lebenslauf Daten (CV):
+CV Data:
 {json.dumps(cv_data, ensure_ascii=False)}
 
-Job-Beschreibung:
+Job Description:
 {job_description}
 """
     for attempt in range(3):
@@ -146,7 +160,7 @@ Job-Beschreibung:
                 response = client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[
-                        {"role": "system", "content": "Du bist ein Karrierespezialist. Antworte NUR im validen JSON-Format."},
+                        {"role": "system", "content": "You are a Career Specialist and Expert Cover Letter Writer. Answer ONLY with valid JSON."},
                         {"role": "user", "content": prompt}
                     ],
                     temperature=0.7
