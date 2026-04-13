@@ -4,6 +4,7 @@ import google.generativeai as genai
 from openai import OpenAI
 from typing import Optional
 import time
+import copy
 
 def analyze_cv_text(text: str, api_key: str, provider: str = 'gemini') -> Optional[dict]:
     """
@@ -82,6 +83,10 @@ Zu analysierender Text:
         raise Exception(f"Fehler bei der KI-Analyse: {str(e)}")
 
 def generate_cover_letter_data(cv_data: dict, job_description: str, api_key: str, provider: str = 'gemini') -> Optional[dict]:
+    cv_data_clean = copy.deepcopy(cv_data)
+    if 'basics' in cv_data_clean and 'photo' in cv_data_clean['basics']:
+        del cv_data_clean['basics']['photo']
+        
     prompt = f"""
 Act as a professional Career Coach Expert and formal cover letter writer.
 
@@ -148,7 +153,7 @@ Output the response ONLY in exactly this JSON format:
 }}
 
 CV Data:
-{json.dumps(cv_data, ensure_ascii=False)}
+{json.dumps(cv_data_clean, ensure_ascii=False)}
 
 Job Description:
 {job_description}
