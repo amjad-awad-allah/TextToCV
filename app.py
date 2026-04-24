@@ -51,28 +51,50 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "💾 4. Export & Download"
 ])
 
-def run_with_animation(task_func, task_type="extract"):
+def run_with_animation(task_func, task_type="extract", lang="German"):
     progress_bar = st.progress(0)
     status_text = st.empty()
     
+    is_en = "english" in lang.lower()
+    
     if task_type == "extract":
-         steps = [
-            (10, "Initializiere Verbindung zur KI..."),
-            (25, "Lese und bereinige Rohdaten..."),
-            (45, "Analysiere Laufbahn und Strukturieren der Erfahrungen..."),
-            (60, "Prüfe Grammatik und Orthografie (C2-Level)..."),
-            (75, "Wende Verbesserungen und Fixes an..."),
-            (85, "Formatiere JSON Resume Daten..."),
-            (95, "Finalisiere Datenverarbeitung...")
-         ]
+         if is_en:
+             steps = [
+                (10, "Initializing AI connection..."),
+                (25, "Reading and cleaning raw data..."),
+                (45, "Analyzing career path and structuring experience..."),
+                (60, "Applying C2-Level grammar and orthography checks..."),
+                (75, "Applying improvements and requested fixes..."),
+                (85, "Formatting JSON Resume data..."),
+                (95, "Finalizing data processing...")
+             ]
+         else:
+             steps = [
+                (10, "Initializiere Verbindung zur KI..."),
+                (25, "Lese und bereinige Rohdaten..."),
+                (45, "Analysiere Laufbahn und Strukturieren der Erfahrungen..."),
+                (60, "Prüfe Grammatik und Orthografie (C2-Level)..."),
+                (75, "Wende Verbesserungen und Fixes an..."),
+                (85, "Formatiere JSON Resume Daten..."),
+                (95, "Finalisiere Datenverarbeitung...")
+             ]
     else:
-         steps = [
-            (15, "Übertrage Daten sicher an HR-Agenten..."),
-            (35, "Bewerte Struktur und professionelle Wirkung..."),
-            (55, "Analysiere Stärken und Auffälligkeiten..."),
-            (75, "Erstelle Punkte für Verbesserungen..."),
-            (90, "Finalisiere Bericht...")
-         ]
+         if is_en:
+             steps = [
+                (15, "Transmitting data securely to HR Agent..."),
+                (35, "Evaluating structure and professional impact..."),
+                (55, "Analyzing strengths and weaknesses..."),
+                (75, "Generating concrete improvement suggestions..."),
+                (90, "Finalizing HR report...")
+             ]
+         else:
+             steps = [
+                (15, "Übertrage Daten sicher an HR-Agenten..."),
+                (35, "Bewerte Struktur und professionelle Wirkung..."),
+                (55, "Analysiere Stärken und Auffälligkeiten..."),
+                (75, "Erstelle Punkte für Verbesserungen..."),
+                (90, "Finalisiere Bericht...")
+             ]
          
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(task_func)
@@ -86,7 +108,8 @@ def run_with_animation(task_func, task_type="extract"):
             time.sleep(0.8)
             
         progress_bar.progress(100)
-        status_text.markdown(f"**✅ Vorgang erfolgreich abgeschlossen (100%)!**")
+        success_msg = "✅ Process successfully completed (100%)!" if is_en else "✅ Vorgang erfolgreich abgeschlossen (100%)!"
+        status_text.markdown(f"**{success_msg}**")
         time.sleep(0.5)
         progress_bar.empty()
         status_text.empty()
@@ -116,24 +139,27 @@ with tab1:
     with col2:
         st.info("💡 **Tip:** Uploading your old CV is the fastest way to start. The AI will understand the structure automatically.")
 
-        if st.button("⭐ AI Profile Evaluation (HR-Feedback)", use_container_width=True):
-            if not api_key:
-                st.error("Please enter an API Key in the sidebar.")
-            elif not raw_cv_text.strip():
-                st.error("Please insert raw text to evaluate.")
-            else:
-                provider = 'openai' if api_provider == "OpenAI" else 'gemini'
-                try:
-                    rating = run_with_animation(
-                        lambda: text_analyzer.rate_cv(raw_cv_text, api_key, provider=provider, target_language=target_language),
-                        task_type="rate"
-                    )
-                    st.session_state['hr_rating'] = rating
-                except Exception as e:
-                    st.error(f"❌ API Error: {str(e)}")
-
     st.markdown("---")
+    st.subheader("⚡ Step 1: Evaluate your Profile (Optional)")
+    st.caption("Get professional HR feedback and identify weaknesses before generating your final CV.")
     
+    if st.button("⭐ Request HR-Feedback", use_container_width=True):
+        if not api_key:
+            st.error("Please enter an API Key in the sidebar.")
+        elif not raw_cv_text.strip():
+            st.error("Please insert raw text to evaluate.")
+        else:
+            provider = 'openai' if api_provider == "OpenAI" else 'gemini'
+            try:
+                rating = run_with_animation(
+                    lambda: text_analyzer.rate_cv(raw_cv_text, api_key, provider=provider, target_language=target_language),
+                    task_type="rate",
+                    lang=target_language
+                )
+                st.session_state['hr_rating'] = rating
+            except Exception as e:
+                st.error(f"❌ API Error: {str(e)}")
+
     if 'hr_rating' in st.session_state:
         rating = st.session_state['hr_rating']
         if isinstance(rating, dict):
@@ -144,16 +170,20 @@ with tab1:
         else:
             st.info(str(rating))
 
+    st.markdown("---")
+    st.subheader("🚀 Step 2: Extract & Auto-Improve")
+    st.caption("The AI will extract your data structurally and automatically fix any selected weaknesses.")
+
     custom_improvements = []
     if 'hr_weaknesses' in st.session_state and st.session_state['hr_weaknesses']:
-        st.markdown("### 🛠️ Auto-Improvement")
+        st.markdown("### 🛠️ Weakness Auto-Fixer")
         custom_improvements = st.multiselect(
             "Select the weaknesses you want the AI to automatically fix during extraction:",
             options=st.session_state['hr_weaknesses'],
             default=st.session_state['hr_weaknesses']
         )
 
-    if st.button("🚀 Extract CV Data", use_container_width=True):
+    if st.button("✨ Extract CV & Apply Improvements", type="primary", use_container_width=True):
         if not api_key:
             st.error("Please enter an API Key in the sidebar.")
         elif not raw_cv_text.strip():
@@ -163,7 +193,8 @@ with tab1:
             try:
                 extracted_data = run_with_animation(
                     lambda: text_analyzer.analyze_cv_text(raw_cv_text, api_key, provider=provider, target_language=target_language, custom_improvements=custom_improvements),
-                    task_type="extract"
+                    task_type="extract",
+                    lang=target_language
                 )
                 
                 if extracted_data:
