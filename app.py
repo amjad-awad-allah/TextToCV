@@ -73,26 +73,6 @@ with tab1:
     with col2:
         st.info("💡 **Tip:** Uploading your old CV is the fastest way to start. The AI will understand the structure automatically.")
 
-        
-        if st.button("🚀 Extract CV Data", use_container_width=True):
-            if not api_key:
-                st.error("Please enter an API Key in the sidebar.")
-            elif not raw_cv_text.strip():
-                st.error("Please insert raw text to extract.")
-            else:
-                with st.spinner(f"Extracting structured data using {api_provider}..."):
-                    provider = 'openai' if api_provider == "OpenAI" else 'gemini'
-                    try:
-                        extracted_data = text_analyzer.analyze_cv_text(raw_cv_text, api_key, provider=provider, target_language=target_language)
-                        
-                        if extracted_data:
-                            st.success("Data successfully extracted! Go to Tab 2 to review and edit.")
-                            st.session_state['cv_data'] = extracted_data
-                        else:
-                            st.error("Error during extraction. No data returned.")
-                    except Exception as e:
-                        st.error(f"❌ API Error: {str(e)}")
-
         if st.button("⭐ AI Profile Evaluation (HR-Feedback)", use_container_width=True):
             if not api_key:
                 st.error("Please enter an API Key in the sidebar.")
@@ -103,7 +83,47 @@ with tab1:
                     provider = 'openai' if api_provider == "OpenAI" else 'gemini'
                     try:
                         rating = text_analyzer.rate_cv(raw_cv_text, api_key, provider=provider, target_language=target_language)
-                        st.info(rating)
+                        st.session_state['hr_rating'] = rating
+                    except Exception as e:
+                        st.error(f"❌ API Error: {str(e)}")
+
+        if 'hr_rating' in st.session_state:
+            rating = st.session_state['hr_rating']
+            if isinstance(rating, dict):
+                st.metric("HR Score", rating.get("score", "N/A"))
+                st.success("💪 Strengths:\n" + "\n".join([f"- {s}" for s in rating.get("strengths", [])]))
+                st.warning("⚠️ Weaknesses:\n" + "\n".join([f"- {w}" for w in rating.get("weaknesses", [])]))
+                st.session_state['hr_weaknesses'] = rating.get("weaknesses", [])
+            else:
+                st.info(str(rating))
+
+        custom_improvements = []
+        if 'hr_weaknesses' in st.session_state and st.session_state['hr_weaknesses']:
+            st.markdown("### 🛠️ Auto-Improvement")
+            custom_improvements = st.multiselect(
+                "Select the weaknesses you want the AI to automatically fix during extraction:",
+                options=st.session_state['hr_weaknesses'],
+                default=st.session_state['hr_weaknesses']
+            )
+
+        if st.button("🚀 Extract CV Data", use_container_width=True):
+            if not api_key:
+                st.error("Please enter an API Key in the sidebar.")
+            elif not raw_cv_text.strip():
+                st.error("Please insert raw text to extract.")
+            else:
+                with st.spinner(f"Extracting structured data using {api_provider}..."):
+                    provider = 'openai' if api_provider == "OpenAI" else 'gemini'
+                    try:
+                        extracted_data = text_analyzer.analyze_cv_text(raw_cv_text, api_key, provider=provider, target_language=target_language, custom_improvements=custom_improvements)
+                        
+                        if extracted_data:
+                            st.success("Data successfully extracted! Go to Tab 2 to review and edit.")
+                            st.session_state['cv_data'] = extracted_data
+                            if 'hr_rating' in st.session_state: del st.session_state['hr_rating']
+                            if 'hr_weaknesses' in st.session_state: del st.session_state['hr_weaknesses']
+                        else:
+                            st.error("Error during extraction. No data returned.")
                     except Exception as e:
                         st.error(f"❌ API Error: {str(e)}")
 

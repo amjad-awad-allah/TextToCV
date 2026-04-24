@@ -6,11 +6,17 @@ from typing import Optional
 import time
 import copy
 
-def analyze_cv_text(text: str, api_key: str, provider: str = 'gemini', target_language: str = 'German') -> Optional[dict]:
+def analyze_cv_text(text: str, api_key: str, provider: str = 'gemini', target_language: str = 'German', custom_improvements: list = None) -> Optional[dict]:
     """
     Verwendet die Gemini API oder OpenAI API, um CV-Daten aus Rohtext in das JSON-Resume-Format zu extrahieren.
     """
     lang_code = "de" if "german" in target_language.lower() or "deutsch" in target_language.lower() else "en"
+    
+    extra_rule = ""
+    if custom_improvements and len(custom_improvements) > 0:
+        improvements_str = "\n".join([f"- {imp}" for imp in custom_improvements])
+        extra_rule = f"\n8. WICHTIGE VERBESSERUNGEN VORNEHMEN: Du musst die folgenden vom HR-Experten identifizierten Schwächen aktiv beheben und den Text entsprechend verbessern:\n{improvements_str}\n"
+
     prompt = f"""
 Du bist ein Experte für die Extraktion von Daten aus Lebensläufen (CV Parser). 
 Deine Aufgabe ist es, den unten stehenden Text zu lesen und in ein präzises JSON-Format umzuwandeln, das der (JSON Resume Schema) Struktur entspricht.
@@ -31,7 +37,7 @@ Regeln:
    - languages: [{{ language, fluency }}]
 
 6. Achte GANZ BESONDERS auf die grammatikalische Korrektheit der Übersetzung und Extraktion. Korrigiere Rechtschreib- und Grammatikfehler aus dem Originaltext. Verwende im Zieltext stets korrekte Artikel (der/die/das) und achte auf eine streng professionelle und fehlerfreie Formulierung.
-7. Formuliere die Beschreibungen der Berufserfahrung (work highlights) STETS einheitlich in der Vergangenheitsform (Past Tense), auch wenn sie im Originaltext anders formuliert sind.
+7. Formuliere die Beschreibungen der Berufserfahrung (work highlights) STETS einheitlich in der Vergangenheitsform (Past Tense), auch wenn sie im Originaltext anders formuliert sind.{extra_rule}
 
 Zu analysierender Text:
 ---
@@ -204,19 +210,27 @@ Job Description:
     except Exception as e:
         raise Exception(f"Fehler bei der KI-Analyse des Anschreibens: {str(e)}")
 
-def rate_cv(cv_text: str, api_key: str, provider: str = 'openai', target_language: str = 'German') -> Optional[str]:
+def rate_cv(cv_text: str, api_key: str, provider: str = 'openai', target_language: str = 'German') -> Optional[dict]:
     prompt = f"""
 Du bist ein erfahrener, absolut professioneller HR-Experte und Recruiter in Deutschland.
 Bewerte den folgenden Lebenslauf basierend auf seiner aktuellen Struktur, Klarheit und Eignung für moderne Bewerbungen (ATS).
 Bitte sei absolut ehrlich und streng. Vermeide jegliche unnötigen Schmeicheleien oder Floskeln.
 Achte GANZ BESONDERS auf grammatikalische und orthografische Fehler sowie auf den sprachlichen Ausdruck.
 Bitte gib dem CV eine realistische Punktzahl von 1 bis 10. Zähle 2-3 echte Stärken sowie 2-3 konkrete Verbesserungsvorschläge auf (inklusive sprachlicher Mängel, falls vorhanden).
-Reagiere kurz und bündig (als einfacher Text). Bitte antworte immer auf {target_language}.
+
+Antworte IMMER und AUSSCHLIESSLICH im folgenden JSON-Format, ohne zusätzlichen Text und ohne Markdown:
+{{
+  "score": "8/10",
+  "strengths": ["Stärke 1", "Stärke 2"],
+  "weaknesses": ["Schwäche 1", "Schwäche 2"]
+}}
+Bitte antworte immer auf {target_language}.
 
 Lebenslauf-Text:
 {cv_text}
 """
     try:
+        content = ""
         for attempt in range(3):
             try:
                 if provider == 'openai':
@@ -224,12 +238,12 @@ Lebenslauf-Text:
                     response = client.chat.completions.create(
                         model="gpt-4o-mini",
                         messages=[
-                            {"role": "system", "content": "Du bist ein HR-Experte auf Deutsch."},
+                            {"role": "system", "content": "Du bist ein HR-Experte auf Deutsch. Antworte NUR mit JSON."},
                             {"role": "user", "content": prompt}
                         ],
                         temperature=0.7
                     )
-                    return response.choices[0].message.content.strip()
+                    content = response.choices[0].message.content.strip()
                 else:
                     genai.configure(api_key=api_key)
                     try:
@@ -238,16 +252,24 @@ Lebenslauf-Text:
                     except Exception:
                         model = genai.GenerativeModel('gemini-flash-latest')
                         response = model.generate_content(prompt)
-                    return response.text.strip()
+                    content = response.text.strip()
+                break
             except Exception as e:
                 if "429" in str(e) or "quota" in str(e).lower():
                     if attempt < 2:
                         time.sleep(5 * (attempt + 1))
                         continue
                 raise e
+        
+        if content.startswith("```json"):
+            content = content[7:-3].strip()
+        elif content.startswith("```"):
+            content = content[3:-3].strip()
+            
+        return json.loads(content)
     except Exception as e:
         print(f"Fehler bei der Bewertung: {e}")
-        return "Fehler bei der KI-Bewertung."
+        return {"score": "Fehler", "strengths": ["Keine Daten analysiert"], "weaknesses": ["Bitte überprüfe deinen API Key und versuche es erneut."]}
 
 if __name__ == "__main__":
     openai_key = os.environ.get("OPENAI_API_KEY")
