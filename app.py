@@ -3,6 +3,7 @@ import os
 import json
 import time
 import uuid
+import concurrent.futures
 import text_analyzer
 import cv_generator
 import cover_letter_generator
@@ -50,6 +51,48 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "💾 4. Export & Download"
 ])
 
+def run_with_animation(task_func, task_type="extract"):
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    if task_type == "extract":
+         steps = [
+            (10, "Initializiere Verbindung zur KI..."),
+            (25, "Lese und bereinige Rohdaten..."),
+            (45, "Analysiere Laufbahn und Strukturieren der Erfahrungen..."),
+            (60, "Prüfe Grammatik und Orthografie (C2-Level)..."),
+            (75, "Wende Verbesserungen und Fixes an..."),
+            (85, "Formatiere JSON Resume Daten..."),
+            (95, "Finalisiere Datenverarbeitung...")
+         ]
+    else:
+         steps = [
+            (15, "Übertrage Daten sicher an HR-Agenten..."),
+            (35, "Bewerte Struktur und professionelle Wirkung..."),
+            (55, "Analysiere Stärken und Auffälligkeiten..."),
+            (75, "Erstelle Punkte für Verbesserungen..."),
+            (90, "Finalisiere Bericht...")
+         ]
+         
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(task_func)
+        step_idx = 0
+        while not future.done():
+            if step_idx < len(steps):
+                pct, msg = steps[step_idx]
+                progress_bar.progress(pct)
+                status_text.markdown(f"**⏳ {msg} ({pct}%)**")
+                step_idx += 1
+            time.sleep(0.8)
+            
+        progress_bar.progress(100)
+        status_text.markdown(f"**✅ Vorgang erfolgreich abgeschlossen (100%)!**")
+        time.sleep(0.5)
+        progress_bar.empty()
+        status_text.empty()
+        
+        return future.result()
+
 # --- TAB 1: EXTRACTION ---
 with tab1:
     st.header("Extract Data from Original CV")
@@ -79,13 +122,15 @@ with tab1:
             elif not raw_cv_text.strip():
                 st.error("Please insert raw text to evaluate.")
             else:
-                 with st.spinner("Generating expert feedback..."):
-                    provider = 'openai' if api_provider == "OpenAI" else 'gemini'
-                    try:
-                        rating = text_analyzer.rate_cv(raw_cv_text, api_key, provider=provider, target_language=target_language)
-                        st.session_state['hr_rating'] = rating
-                    except Exception as e:
-                        st.error(f"❌ API Error: {str(e)}")
+                provider = 'openai' if api_provider == "OpenAI" else 'gemini'
+                try:
+                    rating = run_with_animation(
+                        lambda: text_analyzer.rate_cv(raw_cv_text, api_key, provider=provider, target_language=target_language),
+                        task_type="rate"
+                    )
+                    st.session_state['hr_rating'] = rating
+                except Exception as e:
+                    st.error(f"❌ API Error: {str(e)}")
 
     st.markdown("---")
     
@@ -114,20 +159,22 @@ with tab1:
         elif not raw_cv_text.strip():
             st.error("Please insert raw text to extract.")
         else:
-            with st.spinner(f"Extracting structured data using {api_provider}..."):
-                provider = 'openai' if api_provider == "OpenAI" else 'gemini'
-                try:
-                    extracted_data = text_analyzer.analyze_cv_text(raw_cv_text, api_key, provider=provider, target_language=target_language, custom_improvements=custom_improvements)
-                    
-                    if extracted_data:
-                        st.success("Data successfully extracted! Go to Tab 2 to review and edit.")
-                        st.session_state['cv_data'] = extracted_data
-                        if 'hr_rating' in st.session_state: del st.session_state['hr_rating']
-                        if 'hr_weaknesses' in st.session_state: del st.session_state['hr_weaknesses']
-                    else:
-                        st.error("Error during extraction. No data returned.")
-                except Exception as e:
-                    st.error(f"❌ API Error: {str(e)}")
+            provider = 'openai' if api_provider == "OpenAI" else 'gemini'
+            try:
+                extracted_data = run_with_animation(
+                    lambda: text_analyzer.analyze_cv_text(raw_cv_text, api_key, provider=provider, target_language=target_language, custom_improvements=custom_improvements),
+                    task_type="extract"
+                )
+                
+                if extracted_data:
+                    st.success("Data successfully extracted! Go to Tab 2 to review and edit.")
+                    st.session_state['cv_data'] = extracted_data
+                    if 'hr_rating' in st.session_state: del st.session_state['hr_rating']
+                    if 'hr_weaknesses' in st.session_state: del st.session_state['hr_weaknesses']
+                else:
+                    st.error("Error during extraction. No data returned.")
+            except Exception as e:
+                st.error(f"❌ API Error: {str(e)}")
 
 
 # --- TAB 2: EDITOR ---
