@@ -153,6 +153,13 @@ def _build_header(doc, basics, include_photo=False):
     run_name.bold = True
     run_name.font.size = Pt(18)
     run_name.font.color.rgb = RGBColor(0, 51, 102)
+
+    # 1.5 Job Title
+    label_text = clean_markdown(basics.get("label", ""))
+    if label_text:
+        run_label = p_left.add_run(label_text + "\n")
+        run_label.font.size = Pt(12)
+        run_label.font.color.rgb = RGBColor(100, 100, 100)
     
     # 2. Contact details + Links
     location = basics.get('location', {})

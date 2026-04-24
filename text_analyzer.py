@@ -15,11 +15,11 @@ def analyze_cv_text(text: str, api_key: str, provider: str = 'gemini', target_la
     extra_rule = ""
     if custom_improvements and len(custom_improvements) > 0:
         improvements_str = "\n".join([f"- {imp}" for imp in custom_improvements])
-        extra_rule = f"\n8. WICHTIGE VERBESSERUNGEN VORNEHMEN: Du musst die folgenden vom HR-Experten identifizierten Schwächen aktiv beheben und den Text entsprechend verbessern:\n{improvements_str}\n"
+        extra_rule = f"\n\n*** CRITICAL INSTRUCTION (IMPROVEMENTS) ***\nDer Benutzer hat folgende Schwächen in seinem ursprünglichen Text identifiziert. Du MUSST diese Schwächen beim Extrahieren aktiv ausbessern und die Formulierungen professionell umschreiben:\n{improvements_str}\n**************************\n"
 
     prompt = f"""
-Du bist ein Experte für die Extraktion von Daten aus Lebensläufen (CV Parser). 
-Deine Aufgabe ist es, den unten stehenden Text zu lesen und in ein präzises JSON-Format umzuwandeln, das der (JSON Resume Schema) Struktur entspricht.
+Du bist ein hochkarätiger HR-Experte, professioneller Copywriter und Experte für die Extraktion von Daten aus Lebensläufen (CV Parser). 
+Deine Aufgabe ist es, den unten stehenden Text zu lesen und in ein präzises, FEHLERFREIES JSON-Format umzuwandeln, das der (JSON Resume Schema) Struktur entspricht.
 
 Regeln:
 1. Extrahiere persönliche Informationen, Berufserfahrung, Ausbildung, Fähigkeiten, Projekte, Sprachen und Zertifikate.
@@ -36,8 +36,8 @@ Regeln:
    - certificates: [{{ name, issuer, date }}]
    - languages: [{{ language, fluency }}]
 
-6. Achte GANZ BESONDERS auf die grammatikalische Korrektheit der Übersetzung und Extraktion. Korrigiere Rechtschreib- und Grammatikfehler aus dem Originaltext. Verwende im Zieltext stets korrekte Artikel (der/die/das) und achte auf eine streng professionelle und fehlerfreie Formulierung.
-7. Formuliere die Beschreibungen der Berufserfahrung (work highlights) STETS einheitlich in der Vergangenheitsform (Past Tense), auch wenn sie im Originaltext anders formuliert sind.{extra_rule}
+6. GRAMMATIK & RECHTSCHREIBUNG: Du bist ein C2-Level Native Speaker. Du darfst KEINE Grammatik- oder Rechtschreibfehler aus dem Originaltext übernehmen. Du MUSST Sätze so umformulieren, dass sie makellos, professionell und auf High-End-HR-Niveau sind. Verwende das korrekte Genus und die richtigen Artikel. Dies ist eine absolute Pflicht.
+7. Formuliere die Beschreibungen der Berufserfahrung (work highlights) STETS einheitlich in der Vergangenheitsform (Past Tense).{extra_rule}
 
 Zu analysierender Text:
 ---
@@ -52,10 +52,10 @@ Zu analysierender Text:
                 response = client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[
-                        {"role": "system", "content": "Du bist ein Experte für die Extraktion von Daten aus Lebensläufen. Antworte NUR mit validem JSON."},
+                        {"role": "system", "content": "Du bist ein C2-Level HR Copywriter und Daten-Extraktor. Antworte NUR mit validem JSON und fixiere alle Sprachfehler."},
                         {"role": "user", "content": prompt}
                     ],
-                    temperature=0.2
+                    temperature=0.3
                 )
                 content = response.choices[0].message.content.strip()
             else:
@@ -63,12 +63,12 @@ Zu analysierender Text:
                 try:
                     # Optimized for 2026: Using Gemini 2.5 Flash for fast CV extraction
                     model_name = 'gemini-2.5-flash'
-                    model = genai.GenerativeModel(model_name)
+                    model = genai.GenerativeModel(model_name, generation_config={"temperature": 0.3})
                     response = model.generate_content(prompt)
                 except Exception:
                     # Fallback to the latest generic flash alias
                     try:
-                        model = genai.GenerativeModel('gemini-flash-latest')
+                        model = genai.GenerativeModel('gemini-flash-latest', generation_config={"temperature": 0.3})
                         response = model.generate_content(prompt)
                     except Exception as e2:
                         raise Exception(f"All models failed. Latest error: {str(e2)}")
