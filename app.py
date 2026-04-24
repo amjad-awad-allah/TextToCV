@@ -2,6 +2,7 @@ import streamlit as st
 import os
 import json
 import time
+import uuid
 import text_analyzer
 import cv_generator
 import cover_letter_generator
@@ -28,6 +29,8 @@ if api_provider == "OpenAI":
 else:
     api_key = st.sidebar.text_input("Gemini API Key:", type="password", value=os.environ.get("GEMINI_API_KEY", ""))
 
+st.sidebar.markdown("---")
+target_language = st.sidebar.radio("🌐 AI Output Language:", ["Deutsch (German)", "English"])
 st.sidebar.markdown("---")
 st.sidebar.caption(f"🚀 Version: **{version.VERSION}**")
 st.sidebar.caption(f"📅 Last Update: {version.LAST_UPDATED}")
@@ -80,7 +83,7 @@ with tab1:
                 with st.spinner(f"Extracting structured data using {api_provider}..."):
                     provider = 'openai' if api_provider == "OpenAI" else 'gemini'
                     try:
-                        extracted_data = text_analyzer.analyze_cv_text(raw_cv_text, api_key, provider=provider)
+                        extracted_data = text_analyzer.analyze_cv_text(raw_cv_text, api_key, provider=provider, target_language=target_language)
                         
                         if extracted_data:
                             st.success("Data successfully extracted! Go to Tab 2 to review and edit.")
@@ -99,7 +102,7 @@ with tab1:
                  with st.spinner("Generating expert feedback..."):
                     provider = 'openai' if api_provider == "OpenAI" else 'gemini'
                     try:
-                        rating = text_analyzer.rate_cv(raw_cv_text, api_key, provider=provider)
+                        rating = text_analyzer.rate_cv(raw_cv_text, api_key, provider=provider, target_language=target_language)
                         st.info(rating)
                     except Exception as e:
                         st.error(f"❌ API Error: {str(e)}")
@@ -236,7 +239,7 @@ with tab3:
                  with st.spinner("Analyzing match and writing tailored cover letter..."):
                      provider = 'openai' if api_provider == "OpenAI" else 'gemini'
                      try:
-                        cl_data = text_analyzer.generate_cover_letter_data(st.session_state['cv_data'], job_description, api_key, provider=provider)
+                        cl_data = text_analyzer.generate_cover_letter_data(st.session_state['cv_data'], job_description, api_key, provider=provider, target_language=target_language)
                         
                         if cl_data:
                             st.success("Cover letter content generated! You can edit it below.")
@@ -308,7 +311,7 @@ with tab4:
         else:
             if st.button("Generate CV Document", use_container_width=True):
                  with st.spinner("Building Docx..."):
-                     ts = time.strftime("%Y%m%d_%H%M%S")
+                     ts = time.strftime("%Y%m%d_%H%M%S") + "_" + uuid.uuid4().hex[:6]
                      fname = f"output/Resume_{ts}.docx"
                      cv_generator.generate_cv(st.session_state['cv_data'], fname)
                      st.session_state['out_cv'] = fname
@@ -327,7 +330,7 @@ with tab4:
         else:
             if st.button("Generate Cover Letter", use_container_width=True):
                  with st.spinner("Building Docx..."):
-                     ts = time.strftime("%Y%m%d_%H%M%S")
+                     ts = time.strftime("%Y%m%d_%H%M%S") + "_" + uuid.uuid4().hex[:6]
                      fname = f"output/CoverLetter_{ts}.docx"
                      cover_letter_generator.generate_cover_letter(st.session_state['cv_data'], st.session_state['cl_data'], fname)
                      st.session_state['out_cl'] = fname
@@ -346,7 +349,7 @@ with tab4:
         else:
             if st.button("Generate Combined Doc", use_container_width=True):
                   with st.spinner("Building Docx..."):
-                      ts = time.strftime("%Y%m%d_%H%M%S")
+                      ts = time.strftime("%Y%m%d_%H%M%S") + "_" + uuid.uuid4().hex[:6]
                       fname = f"output/Application_{ts}.docx"
                       combined_generator.generate_combined(st.session_state['cv_data'], st.session_state['cl_data'], fname)
                       st.session_state['out_combo'] = fname

@@ -6,10 +6,11 @@ from typing import Optional
 import time
 import copy
 
-def analyze_cv_text(text: str, api_key: str, provider: str = 'gemini') -> Optional[dict]:
+def analyze_cv_text(text: str, api_key: str, provider: str = 'gemini', target_language: str = 'German') -> Optional[dict]:
     """
     Verwendet die Gemini API oder OpenAI API, um CV-Daten aus Rohtext in das JSON-Resume-Format zu extrahieren.
     """
+    lang_code = "de" if "german" in target_language.lower() or "deutsch" in target_language.lower() else "en"
     prompt = f"""
 Du bist ein Experte für die Extraktion von Daten aus Lebensläufen (CV Parser). 
 Deine Aufgabe ist es, den unten stehenden Text zu lesen und in ein präzises JSON-Format umzuwandeln, das der (JSON Resume Schema) Struktur entspricht.
@@ -17,10 +18,10 @@ Deine Aufgabe ist es, den unten stehenden Text zu lesen und in ein präzises JSO
 Regeln:
 1. Extrahiere persönliche Informationen, Berufserfahrung, Ausbildung, Fähigkeiten, Projekte, Sprachen und Zertifikate.
 2. Wenn du Links findest (LinkedIn, GitHub, Webseite), setze sie an die richtige Stelle.
-3. BEHALTE DIE SPRACHE DES TEXTES STRENG BEI. Wenn der Text auf Englisch ist, MÜSSEN die extrahierten Daten auf Englisch sein. Wenn der Text auf Deutsch ist, auf Deutsch. Erkenne die Sprache automatisch.
-4. Antworte **NUR** mit validem JSON-Code, ohne zusätzlichen Text, ohne Markdown und ohne Kommentare. Keine Trailing-Commas! Der Schlüssel "language" muss den Code der erkannten Sprache enthalten (z.B. "en" oder "de").
+3. Die Ausgabesprache MUSS streng in der Zielsprache ({target_language}) sein. Übersetze alle extrahierten Inhalte in diese Sprache.
+4. Antworte **NUR** mit validem JSON-Code, ohne zusätzlichen Text, ohne Markdown und ohne Kommentare. Keine Trailing-Commas! Der Schlüssel "language" muss genau "{lang_code}" lauten.
 5. Erforderliche Struktur:
-   - language: "en" 
+   - language: "{lang_code}" 
    - basics: {{ name, email, phone, url, summary, location, profiles: [{{ network, url }}] }}
    - work: [{{ name, position, startDate, endDate, highlights: [] }}]
    - education: [{{ institution, area, studyType, startDate, endDate, courses: [], notes }}]
@@ -28,6 +29,8 @@ Regeln:
    - projects: [{{ name, description, highlights: [], keywords: [], url }}]
    - certificates: [{{ name, issuer, date }}]
    - languages: [{{ language, fluency }}]
+
+6. Achte GANZ BESONDERS auf die grammatikalische Korrektheit der Übersetzung und Extraktion. Korrigiere Rechtschreib- und Grammatikfehler aus dem Originaltext. Verwende im Zieltext stets korrekte Artikel (der/die/das) und achte auf eine streng professionelle und fehlerfreie Formulierung.
 
 Zu analysierender Text:
 ---
@@ -82,7 +85,7 @@ Zu analysierender Text:
     except Exception as e:
         raise Exception(f"Fehler bei der KI-Analyse: {str(e)}")
 
-def generate_cover_letter_data(cv_data: dict, job_description: str, api_key: str, provider: str = 'gemini') -> Optional[dict]:
+def generate_cover_letter_data(cv_data: dict, job_description: str, api_key: str, provider: str = 'gemini', target_language: str = 'German') -> Optional[dict]:
     cv_data_clean = copy.deepcopy(cv_data)
     if 'basics' in cv_data_clean and 'photo' in cv_data_clean['basics']:
         del cv_data_clean['basics']['photo']
@@ -92,10 +95,9 @@ Act as a professional Career Coach Expert and formal cover letter writer.
 
 Your task is to write a Cover Letter based on the provided CV data and Job Description.
 
-CRITICAL LANGUAGE RULE: The cover letter MUST be written entirely in the EXACT SAME language as the provided Job Description. 
-- If the Job Description is in English, you MUST write the entire cover letter in English.
-- If the Job Description is in German, you MUST write the entire cover letter in German.
-IGNORE the language of the CV data when deciding the writing language. ALWAYS match the Job Description language.
+CRITICAL LANGUAGE RULE: The cover letter MUST be written entirely in the TARGET LANGUAGE ({target_language}). 
+- You MUST write the entire cover letter in {target_language}.
+IGNORE the language of the Job Description and the CV data when deciding the writing language. ALWAYS use the TARGET LANGUAGE.
 
 ⚠️ Strictly follow these rules:
 
@@ -125,14 +127,14 @@ IGNORE the language of the CV data when deciding the writing language. ALWAYS ma
 
 4. JSON Formatting:
 - Provide ONLY valid JSON.
-- The "language" key MUST be the detected language code matching your content (e.g., "en" or "de").
+- The "language" key MUST be exactly "{lang_code}".
 - NO trailing commas.
 - NO comments inside the JSON.
 
 Output the response ONLY in exactly this JSON format:
 
 {{
-  "language": "en",
+  "language": "{lang_code}",
   "recipient": {{
     "company": "Company Name",
     "contact_person": "Contact Person",
@@ -201,12 +203,14 @@ Job Description:
     except Exception as e:
         raise Exception(f"Fehler bei der KI-Analyse des Anschreibens: {str(e)}")
 
-def rate_cv(cv_text: str, api_key: str, provider: str = 'openai') -> Optional[str]:
+def rate_cv(cv_text: str, api_key: str, provider: str = 'openai', target_language: str = 'German') -> Optional[str]:
     prompt = f"""
-Du bist ein erfahrener HR-Experte und Recruiter in Deutschland.
-Bewerte den folgenden Lebenslauf-Text basierend auf seiner aktuellen Struktur, Klarheit und Eignung für moderne Bewerbungen (ATS).
-Bitte sei konstruktiv, gib dem CV eine Punktzahl von 1 bis 10 und zähle 2-3 Stärken sowie 2-3 Verbesserungsvorschläge auf.
-Reagiere kurz und bündig (als einfacher Text).
+Du bist ein erfahrener, absolut professioneller HR-Experte und Recruiter in Deutschland.
+Bewerte den folgenden Lebenslauf basierend auf seiner aktuellen Struktur, Klarheit und Eignung für moderne Bewerbungen (ATS).
+Bitte sei absolut ehrlich und streng. Vermeide jegliche unnötigen Schmeicheleien oder Floskeln.
+Achte GANZ BESONDERS auf grammatikalische und orthografische Fehler sowie auf den sprachlichen Ausdruck.
+Bitte gib dem CV eine realistische Punktzahl von 1 bis 10. Zähle 2-3 echte Stärken sowie 2-3 konkrete Verbesserungsvorschläge auf (inklusive sprachlicher Mängel, falls vorhanden).
+Reagiere kurz und bündig (als einfacher Text). Bitte antworte immer auf {target_language}.
 
 Lebenslauf-Text:
 {cv_text}

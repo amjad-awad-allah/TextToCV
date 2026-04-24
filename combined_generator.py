@@ -307,7 +307,7 @@ def generate_combined(cv_data_input, letter_data_input, output_file="Combined_Ap
     p_date.paragraph_format.space_after = Pt(20)
     now = datetime.datetime.now()
     
-    city_raw = clean_markdown(letter_data.get('location', 'Essen'))
+    city_raw = clean_markdown(letter_data.get('location', 'Stadt'))
     import re
     city_only = re.sub(r'\d+', '', city_raw).strip(', ')
     

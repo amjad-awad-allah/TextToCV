@@ -179,7 +179,7 @@ def generate_cover_letter(cv_data_input, letter_data_input, output_file="Anschre
     now = datetime.datetime.now()
     
     # Format: "City, DD.MM.YYYY" (No postal code in date line per request)
-    city_raw = clean_markdown(letter_data.get('location', 'Essen'))
+    city_raw = clean_markdown(letter_data.get('location', 'Stadt'))
     # Clean city_raw: remove digits and leading/trailing spaces/commas
     import re
     city_only = re.sub(r'\d+', '', city_raw).strip(', ')

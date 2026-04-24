@@ -47,7 +47,7 @@ except Exception as e:
 # 3. Check Generators (In-Memory Test)
 print("\nStep 3: Testing Document Generators (In-Memory)...")
 dummy_data = {
-    "basics": {"name": "Test User", "email": "test@example.com", "location": {"city": "Essen", "postalCode": "45307"}},
+    "basics": {"name": "Test User", "email": "test@example.com", "location": {"city": "Stadt", "postalCode": "12345"}},
     "work": [], "education": [], "skills": [], "projects": [], "certificates": [], "languages": []
 }
 dummy_letter = {
@@ -56,7 +56,7 @@ dummy_letter = {
     "paragraphs": ["This is a test paragraph."],
     "closing": "Mit freundlichen Grüßen",
     "subject": "Test Bewerbung",
-    "location": "Essen"
+    "location": "Stadt"
 }
 
 try:
