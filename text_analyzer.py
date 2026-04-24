@@ -31,6 +31,7 @@ Regeln:
    - languages: [{{ language, fluency }}]
 
 6. Achte GANZ BESONDERS auf die grammatikalische Korrektheit der Übersetzung und Extraktion. Korrigiere Rechtschreib- und Grammatikfehler aus dem Originaltext. Verwende im Zieltext stets korrekte Artikel (der/die/das) und achte auf eine streng professionelle und fehlerfreie Formulierung.
+7. Formuliere die Beschreibungen der Berufserfahrung (work highlights) STETS einheitlich in der Vergangenheitsform (Past Tense), auch wenn sie im Originaltext anders formuliert sind.
 
 Zu analysierender Text:
 ---
