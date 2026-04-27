@@ -93,6 +93,7 @@ Zu analysierender Text:
         raise Exception(f"Fehler bei der KI-Analyse: {str(e)}")
 
 def generate_cover_letter_data(cv_data: dict, job_description: str, api_key: str, provider: str = 'gemini', target_language: str = 'German') -> Optional[dict]:
+    lang_code = "de" if "german" in target_language.lower() or "deutsch" in target_language.lower() else "en"
     cv_data_clean = copy.deepcopy(cv_data)
     if 'basics' in cv_data_clean and 'photo' in cv_data_clean['basics']:
         del cv_data_clean['basics']['photo']
