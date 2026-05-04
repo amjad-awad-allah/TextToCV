@@ -478,63 +478,58 @@ with tab4:
 # --- TAB 5: PRIVATE CV ---
 if tab5:
     with tab5:
-        st.header("💎 Amjad's Private CV Translation & Formatting")
-        st.markdown("This area is strictly customized using your **Internal Master CV** (stored in the project).")
+        st.header("💎 Amjad's Private CV: Faithful Translation & Rebuilding")
+        st.markdown("This area is optimized to **rebuild your CV in a new language** while strictly preserving your original structure, links, and formatting style.")
         
-        target_lang_private = st.radio("Select Translation Language:", ["Deutsch (German)", "English"], key="private_lang")
+        target_lang_private = st.radio("Select Target Language:", ["Deutsch (German)", "English"], key="private_lang")
         
         st.markdown("---")
-        st.subheader("🔄 Update & Synchronize")
-        st.caption("Upload a file (DOCX/PDF/TXT) with new experiences, projects, or notes to merge into your master CV.")
-        new_info_file = st.file_uploader("Upload New Info / Update File:", type=['pdf', 'docx', 'txt'], key="private_uploader")
+        
+        # Determine master CV text
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        local_path = os.path.join(current_dir, "private", "Amjad_CV.docx")
+        
+        master_cv_text = ""
+        if os.path.exists(local_path):
+            st.info("✅ Master CV detected in the system.")
+            import file_utils
+            master_cv_text = file_utils.extract_text_with_links_from_local(local_path)
+        else:
+            st.warning("⚠️ Master CV not found. Please upload it to begin.")
+            uploaded_master = st.file_uploader("Upload Master CV (DOCX):", type=['docx'], key="master_uploader")
+            if uploaded_master:
+                import file_utils
+                master_cv_text = file_utils.extract_text_from_file(uploaded_master)
+                st.success("Master CV loaded for this session.")
 
-        if st.button("🚀 Process & Generate My Premium CV", type="primary", use_container_width=True):
+        if st.button("🚀 Rebuild CV in " + target_lang_private, type="primary", use_container_width=True):
             if not api_key:
                 st.error("Please enter an API Key in the sidebar.")
+            elif not master_cv_text:
+                st.error("Please provide your Master CV first.")
             else:
-                with st.spinner("Processing documents..."):
-                    current_dir = os.path.dirname(os.path.abspath(__file__))
-                    local_path = os.path.join(current_dir, "private", "Amjad_CV.docx")
-                    import file_utils
-                    if not os.path.exists(local_path):
-                        st.error(f"Private CV file not found at {local_path}.")
-                    else:
-                        base_cv_text = file_utils.extract_text_with_links_from_local(local_path)
-                        new_info_text = ""
-                        if new_info_file:
-                            new_info_text = file_utils.extract_text_from_file(new_info_file)
+                with st.spinner("Translating while preserving structure & links..."):
+                    provider = 'openai' if api_provider == "OpenAI" else 'gemini'
+                    try:
+                        import text_analyzer
+                        extracted_data = run_with_animation(
+                            lambda: text_analyzer.translate_cv_faithfully(master_cv_text, target_lang_private, api_key, provider=provider),
+                            task_type="extract",
+                            lang=target_lang_private
+                        )
                         
-                        st.success("Documents read! Merging and optimizing content...")
-                        provider = 'openai' if api_provider == "OpenAI" else 'gemini'
-                        try:
-                            import text_analyzer
-                            if new_info_text:
-                                # Merge New Info with Base CV
-                                extracted_data = run_with_animation(
-                                    lambda: text_analyzer.update_cv_with_new_info(base_cv_text, new_info_text, api_key, provider=provider, target_language=target_lang_private),
-                                    task_type="extract",
-                                    lang=target_lang_private
-                                )
-                            else:
-                                # Just translate/optimize the Base CV
-                                extracted_data = run_with_animation(
-                                    lambda: text_analyzer.analyze_cv_text(base_cv_text, api_key, provider=provider, target_language=target_lang_private),
-                                    task_type="extract",
-                                    lang=target_lang_private
-                                )
+                        if extracted_data:
+                            st.session_state['cv_data'] = extracted_data
+                            st.success(f"✅ CV Successfully Rebuilt in {target_lang_private}!")
                             
-                            if extracted_data:
-                                st.session_state['cv_data'] = extracted_data
-                                st.success("✅ CV Successfully Updated & Structured!")
-                                
-                                import time, uuid, os, cv_generator
-                                ts = time.strftime("%Y%m%d_%H%M%S")
-                                fname = f"output/Amjad_Premium_CV_{'DE' if 'Deutsch' in target_lang_private else 'EN'}_{ts}.docx"
-                                cv_generator.generate_cv(extracted_data, fname)
-                                
-                                with open(fname, "rb") as f:
-                                    st.download_button("⬇️ Download Premium CV", data=f, file_name=os.path.basename(fname), mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
-                            else:
-                                st.error("Error during processing.")
-                        except Exception as e:
-                            st.error(f"❌ API Error: {str(e)}")
+                            import time, uuid, os, cv_generator
+                            ts = time.strftime("%Y%m%d_%H%M%S")
+                            fname = f"output/Amjad_Faithful_CV_{'DE' if 'Deutsch' in target_lang_private else 'EN'}_{ts}.docx"
+                            cv_generator.generate_cv(extracted_data, fname)
+                            
+                            with open(fname, "rb") as f:
+                                st.download_button("⬇️ Download Rebuilt CV", data=f, file_name=os.path.basename(fname), mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
+                        else:
+                            st.error("Translation failed.")
+                    except Exception as e:
+                        st.error(f"❌ API Error: {str(e)}")

@@ -282,6 +282,66 @@ Antworte NUR mit validem JSON.
     elif content.startswith("```"): content = content[3:-3].strip()
     return json.loads(content)
 
+def translate_cv_faithfully(raw_text: str, target_language: str, api_key: str, provider: str = 'gemini') -> Optional[dict]:
+    """
+    Translates a CV while strictly preserving structure and links.
+    """
+    lang_code = "de" if "german" in target_language.lower() or "deutsch" in target_language.lower() else "en"
+    
+    prompt = f"""
+Du bist ein erstklassiger Übersetzer für professionelle Lebensläufe.
+Deine Aufgabe: Übersetze den folgenden Lebenslauf-Text exakt in die Zielsprache ({target_language}).
+
+⚠️ KRITISCHE REGELN:
+1. STRUKTUR & LINKS: Behalte die exakte Struktur, alle Überschriften und ALLE Links/URLs (z.B. https://...) bei. Lösche KEINE Links.
+2. NICHT-HETEROGENE ÜBERSETZUNG: Die Übersetzung darf NICHT wortwörtlich sein. Nutze professionelle Fachbegriffe und eine elegante Ausdrucksweise, die im Zielland ({target_language}) üblich ist.
+3. KEINE ÄNDERUNG: Verändere keine Fakten, Daten oder Stationen.
+4. AUSGABE: Antworte NUR im JSON Resume Format, damit die Struktur gewahrt bleibt.
+
+Zu übersetzender Text:
+---
+{raw_text}
+---
+
+JSON Struktur:
+- language: "{lang_code}"
+- basics: {{ name, email, phone, url, summary, location, profiles: [{{ network, url }}] }}
+- work: [{{ name, position, startDate, endDate, highlights: [] }}]
+- education: [{{ institution, area, studyType, startDate, endDate, notes }}]
+- skills: [{{ name, keywords: [] }}]
+- projects: [{{ name, description, highlights: [], keywords: [], url }}]
+- certificates: [{{ name, issuer, date }}]
+- languages: [{{ language, fluency }}]
+
+Antworte NUR mit validem JSON.
+"""
+    for attempt in range(3):
+        try:
+            if provider == 'openai':
+                client = OpenAI(api_key=api_key)
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "You are a professional CV Translator. Answer ONLY with valid JSON."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.2
+                )
+                content = response.choices[0].message.content.strip()
+            else:
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel('gemini-2.5-flash')
+                response = model.generate_content(prompt)
+                content = response.text.strip()
+            break
+        except Exception as e:
+            if attempt < 2: time.sleep(2); continue
+            raise e
+            
+    if content.startswith("```json"): content = content[7:-3].strip()
+    elif content.startswith("```"): content = content[3:-3].strip()
+    return json.loads(content)
+
 def rate_cv(cv_text: str, api_key: str, provider: str = 'openai', target_language: str = 'German') -> Optional[dict]:
     prompt = f"""
 Du bist ein erfahrener, absolut professioneller HR-Experte und Recruiter in Deutschland.
