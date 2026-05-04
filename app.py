@@ -479,49 +479,61 @@ with tab4:
 if tab5:
     with tab5:
         st.header("💎 Amjad's Private CV Translation & Formatting")
-        st.markdown("This area is strictly customized for your CV located at `C:\\Users\\User\\Desktop\\praktikum\\Amjad Awad-Allah lebenslauf.docx`.")
+        st.markdown("This area is strictly customized using your **Internal Master CV** (stored in the project).")
         
         target_lang_private = st.radio("Select Translation Language:", ["Deutsch (German)", "English"], key="private_lang")
         
-        if st.button("🚀 Load, Translate & Optimize My CV", type="primary", use_container_width=True):
+        st.markdown("---")
+        st.subheader("🔄 Update & Synchronize")
+        st.caption("Upload a file (DOCX/PDF/TXT) with new experiences, projects, or notes to merge into your master CV.")
+        new_info_file = st.file_uploader("Upload New Info / Update File:", type=['pdf', 'docx', 'txt'], key="private_uploader")
+
+        if st.button("🚀 Process & Generate My Premium CV", type="primary", use_container_width=True):
             if not api_key:
                 st.error("Please enter an API Key in the sidebar.")
             else:
-                with st.spinner("Extracting text and hyperlinks from local DOCX..."):
+                with st.spinner("Processing documents..."):
                     local_path = os.path.join("private", "Amjad_CV.docx")
                     import file_utils
                     if not os.path.exists(local_path):
-                        st.error(f"Private CV file not found at {local_path}. Please make sure it exists.")
+                        st.error(f"Private CV file not found at {local_path}.")
                     else:
-                        raw_cv_text = file_utils.extract_text_with_links_from_local(local_path)
-                    
-                    if raw_cv_text.startswith("Error") or raw_cv_text == "Unsupported local file format.":
-                        st.error(raw_cv_text)
-                    else:
-                        st.success("File read successfully! Now translating and structuring...")
+                        base_cv_text = file_utils.extract_text_with_links_from_local(local_path)
+                        new_info_text = ""
+                        if new_info_file:
+                            new_info_text = file_utils.extract_text_from_file(new_info_file)
+                        
+                        st.success("Documents read! Merging and optimizing content...")
                         provider = 'openai' if api_provider == "OpenAI" else 'gemini'
                         try:
                             import text_analyzer
-                            extracted_data = run_with_animation(
-                                lambda: text_analyzer.analyze_cv_text(raw_cv_text, api_key, provider=provider, target_language=target_lang_private),
-                                task_type="extract",
-                                lang=target_lang_private
-                            )
+                            if new_info_text:
+                                # Merge New Info with Base CV
+                                extracted_data = run_with_animation(
+                                    lambda: text_analyzer.update_cv_with_new_info(base_cv_text, new_info_text, api_key, provider=provider, target_language=target_lang_private),
+                                    task_type="extract",
+                                    lang=target_lang_private
+                                )
+                            else:
+                                # Just translate/optimize the Base CV
+                                extracted_data = run_with_animation(
+                                    lambda: text_analyzer.analyze_cv_text(base_cv_text, api_key, provider=provider, target_language=target_lang_private),
+                                    task_type="extract",
+                                    lang=target_lang_private
+                                )
                             
                             if extracted_data:
                                 st.session_state['cv_data'] = extracted_data
-                                st.success("✅ CV Successfully Translated & Structured! The data is now available in Tab 2 and Tab 4.")
+                                st.success("✅ CV Successfully Updated & Structured!")
                                 
                                 import time, uuid, os, cv_generator
-                                ts = time.strftime("%Y%m%d_%H%M%S") + "_" + uuid.uuid4().hex[:6]
-                                fname = f"output/Amjad_CV_{'DE' if 'Deutsch' in target_lang_private else 'EN'}_{ts}.docx"
+                                ts = time.strftime("%Y%m%d_%H%M%S")
+                                fname = f"output/Amjad_Premium_CV_{'DE' if 'Deutsch' in target_lang_private else 'EN'}_{ts}.docx"
                                 cv_generator.generate_cv(extracted_data, fname)
                                 
                                 with open(fname, "rb") as f:
-                                    st.download_button("⬇️ Download Translated CV", data=f, file_name=os.path.basename(fname), mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
-                                if st.button("📂 Open Translated CV", use_container_width=True, key="open_private_cv"):
-                                    os.startfile(os.path.abspath(fname))
+                                    st.download_button("⬇️ Download Premium CV", data=f, file_name=os.path.basename(fname), mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
                             else:
-                                st.error("Error during extraction.")
+                                st.error("Error during processing.")
                         except Exception as e:
                             st.error(f"❌ API Error: {str(e)}")

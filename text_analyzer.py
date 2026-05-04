@@ -214,6 +214,74 @@ Job Description:
     except Exception as e:
         raise Exception(f"Fehler bei der KI-Analyse des Anschreibens: {str(e)}")
 
+def update_cv_with_new_info(base_cv_text: str, new_info_text: str, api_key: str, provider: str = 'gemini', target_language: str = 'German') -> Optional[dict]:
+    """
+    Takes an existing CV and new information, and returns an updated JSON Resume.
+    """
+    lang_code = "de" if "german" in target_language.lower() or "deutsch" in target_language.lower() else "en"
+    
+    prompt = f"""
+Du bist ein erstklassiger Executive CV Writer. 
+Hier ist der aktuelle Lebenslauf eines Kandidaten (Base CV) und hier sind neue Informationen oder Aktualisierungen (New Info).
+
+Deine Aufgabe:
+1. Aktualisiere den Lebenslauf des Kandidaten, indem du die neuen Informationen sinnvoll integrierst.
+2. Behalte die grundlegende Struktur و المهارات و الروابط من السيرة الذاتية الأساسية.
+3. Verbessere die Formulierungen auf Premium-Niveau (C2 Native Speaker).
+4. Sorge dafür, dass KEINE Redundanz entsteht.
+5. Das Ergebnis muss ein valides JSON im JSON Resume Format sein.
+
+WICHTIG:
+- Nutze starke Action-Verben.
+- Erstelle einen packenden Professional Hook am Anfang.
+- Gruppiere Skills sauber.
+- Sprache der Ausgabe: {target_language}.
+
+Base CV Text:
+{base_cv_text}
+
+New Info Text:
+{new_info_text}
+
+JSON Struktur:
+- language: "{lang_code}"
+- basics: {{ name, email, phone, url, summary, location, profiles: [{{ network, url }}] }}
+- work: [{{ name, position, startDate, endDate, highlights: [] }}]
+- education: [{{ institution, area, studyType, startDate, endDate, notes }}]
+- skills: [{{ name, keywords: [] }}]
+- projects: [{{ name, description, highlights: [], keywords: [], url }}]
+- certificates: [{{ name, issuer, date }}]
+- languages: [{{ language, fluency }}]
+
+Antworte NUR mit validem JSON.
+"""
+    for attempt in range(3):
+        try:
+            if provider == 'openai':
+                client = OpenAI(api_key=api_key)
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "You are an Executive CV Writer. Answer ONLY with valid JSON."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.3
+                )
+                content = response.choices[0].message.content.strip()
+            else:
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel('gemini-2.5-flash')
+                response = model.generate_content(prompt)
+                content = response.text.strip()
+            break
+        except Exception as e:
+            if attempt < 2: time.sleep(2); continue
+            raise e
+            
+    if content.startswith("```json"): content = content[7:-3].strip()
+    elif content.startswith("```"): content = content[3:-3].strip()
+    return json.loads(content)
+
 def rate_cv(cv_text: str, api_key: str, provider: str = 'openai', target_language: str = 'German') -> Optional[dict]:
     prompt = f"""
 Du bist ein erfahrener, absolut professioneller HR-Experte und Recruiter in Deutschland.
