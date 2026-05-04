@@ -37,7 +37,9 @@ Regeln:
    - languages: [{{ language, fluency }}]
 
 6. GRAMMATIK & RECHTSCHREIBUNG: Du bist ein C2-Level Native Speaker. Du darfst KEINE Grammatik- oder Rechtschreibfehler aus dem Originaltext übernehmen. Du MUSST Sätze so umformulieren, dass sie makellos, professionell und auf High-End-HR-Niveau sind. Verwende das korrekte Genus und die richtigen Artikel. Dies ist eine absolute Pflicht.
-7. Formuliere die Beschreibungen der Berufserfahrung (work highlights) STETS einheitlich in der Vergangenheitsform (Past Tense).{extra_rule}
+7. Formuliere die Beschreibungen der Berufserfahrung (work highlights) STETS einheitlich in der Vergangenheitsform (Past Tense).
+8. WICHTIG ZUR VERMEIDUNG VON REDUNDANZ: Integriere berufliche Projekte IMMER direkt als 'highlights' in die jeweilige 'work' (Berufserfahrung) Station. Nutze das Array 'projects' NUR für private, eigenständige oder Open-Source-Projekte, die NICHT zu einer Festanstellung gehören. Vermeide strikt jegliche Doppelnennung von Inhalten zwischen 'work' und 'projects'.
+9. DATUMSFORMAT: Das Format 'MM.YYYY' (z.B. 06.2026) ist absolut korrekt. Übernimm diese Daten exakt so und betrachte sie niemals als Fehler.{extra_rule}
 
 Zu analysierender Text:
 ---
@@ -217,6 +219,7 @@ Du bist ein erfahrener, absolut professioneller HR-Experte und Recruiter in Deut
 Bewerte den folgenden Lebenslauf basierend auf seiner aktuellen Struktur, Klarheit und Eignung für moderne Bewerbungen (ATS).
 Bitte sei absolut ehrlich und streng. Vermeide jegliche unnötigen Schmeicheleien oder Floskeln.
 Achte GANZ BESONDERS auf grammatikalische und orthografische Fehler sowie auf den sprachlichen Ausdruck.
+WICHTIG: Das Datumsformat 'MM.YYYY' (z.B. 06.2026) ist in Deutschland der absolute Standard. Markiere dieses Format unter keinen Umständen als Fehler oder Schwäche!
 Bitte gib dem CV eine realistische Punktzahl von 1 bis 10. Zähle 2-3 echte Stärken sowie 2-3 konkrete Verbesserungsvorschläge auf (inklusive sprachlicher Mängel, falls vorhanden).
 
 Antworte IMMER und AUSSCHLIESSLICH im folgenden JSON-Format, ohne zusätzlichen Text und ohne Markdown:
