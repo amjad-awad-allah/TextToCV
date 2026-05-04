@@ -493,7 +493,8 @@ if tab5:
                 st.error("Please enter an API Key in the sidebar.")
             else:
                 with st.spinner("Processing documents..."):
-                    local_path = os.path.join("private", "Amjad_CV.docx")
+                    current_dir = os.path.dirname(os.path.abspath(__file__))
+                    local_path = os.path.join(current_dir, "private", "Amjad_CV.docx")
                     import file_utils
                     if not os.path.exists(local_path):
                         st.error(f"Private CV file not found at {local_path}.")
