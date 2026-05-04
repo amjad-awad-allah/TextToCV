@@ -18,15 +18,20 @@ def analyze_cv_text(text: str, api_key: str, provider: str = 'gemini', target_la
         extra_rule = f"\n\n*** CRITICAL INSTRUCTION (IMPROVEMENTS) ***\nDer Benutzer hat folgende Schwächen in seinem ursprünglichen Text identifiziert. Du MUSST diese Schwächen beim Extrahieren aktiv ausbessern und die Formulierungen professionell umschreiben:\n{improvements_str}\n**************************\n"
 
     prompt = f"""
-Du bist ein hochkarätiger HR-Experte, professioneller Copywriter und Experte für die Extraktion von Daten aus Lebensläufen (CV Parser). 
-Deine Aufgabe ist es, den unten stehenden Text zu lesen und in ein präzises, FEHLERFREIES JSON-Format umzuwandeln, das der (JSON Resume Schema) Struktur entspricht.
+Du bist ein erstklassiger Executive CV Writer, HR-Experte und professioneller Copywriter.
+Deine Aufgabe ist es, den unten stehenden Text nicht nur zu extrahieren, sondern auf ein absolutes Premium-Niveau zu HEBEN (Upskilling in der Formulierung, ohne Fakten zu erfinden), und in ein präzises, FEHLERFREIES JSON-Format umzuwandeln.
 
-Regeln:
-1. Extrahiere persönliche Informationen, Berufserfahrung, Ausbildung, Fähigkeiten, Projekte, Sprachen und Zertifikate.
-2. Wenn du Links findest (LinkedIn, GitHub, Webseite), setze sie an die richtige Stelle.
-3. Die Ausgabesprache MUSS streng in der Zielsprache ({target_language}) sein. Übersetze alle extrahierten Inhalte in diese Sprache.
-4. Antworte **NUR** mit validem JSON-Code, ohne zusätzlichen Text, ohne Markdown und ohne Kommentare. Keine Trailing-Commas! Der Schlüssel "language" muss genau "{lang_code}" lauten.
-5. Erforderliche Struktur:
+WICHTIGE REGELN FÜR PREMIUM-QUALITÄT:
+1. STARTER HOOK (basics.summary): Schreibe einen extrem starken, packenden "Professional Hook" (2-3 Sätze). Verkaufe den Kandidaten! Nenne die Kernkompetenz, die Jahre an Erfahrung und den einzigartigen Mehrwert. Keine langweiligen Standardfloskeln.
+2. UPLEVELING DER ERFAHRUNG (work.highlights): Die Tätigkeiten müssen auf hohem Niveau klingen. Nutze starke Action-Verben (z.B. "Entwickelte", "Leitete", "Optimierte"). Betone den Business-Impact und echte Erfolge. Lass die Erfahrung NICHT juniorig oder wie eine einfache To-Do-Liste klingen.
+3. KLARE, LESBARE SKILLS (skills): Gruppiere technische Fähigkeiten logisch (z.B. nach "Frontend", "Backend", "Tools", "Methoden" in `name`). Die `keywords` dürfen NUR kurze, saubere Begriffe sein (z.B. "React", "Python", "Docker"), KEINE ganzen Sätze!
+4. KEINE REDUNDANZ: Vermeide jegliche Wiederholung. Integriere berufliche Projekte IMMER als 'highlights' in die jeweilige 'work' (Berufserfahrung) Station. Nutze das 'projects' Array NUR für reine Hobby-, Freelance- oder Open-Source-Projekte.
+5. DATUMSFORMAT: Das Format 'MM.YYYY' (z.B. 06.2026) ist absolut korrekt. Übernimm diese Daten exakt so.
+
+TECHNISCHE REGELN:
+6. Die Ausgabesprache MUSS streng in der Zielsprache ({target_language}) sein.
+7. Antworte **NUR** mit validem JSON-Code. Keine Trailing-Commas! Der Schlüssel "language" muss genau "{lang_code}" lauten.
+8. Erforderliche JSON-Struktur:
    - language: "{lang_code}" 
    - basics: {{ name, email, phone, url, summary, location, profiles: [{{ network, url }}] }}
    - work: [{{ name, position, startDate, endDate, highlights: [] }}]
@@ -35,11 +40,7 @@ Regeln:
    - projects: [{{ name, description, highlights: [], keywords: [], url }}]
    - certificates: [{{ name, issuer, date }}]
    - languages: [{{ language, fluency }}]
-
-6. GRAMMATIK & RECHTSCHREIBUNG: Du bist ein C2-Level Native Speaker. Du darfst KEINE Grammatik- oder Rechtschreibfehler aus dem Originaltext übernehmen. Du MUSST Sätze so umformulieren, dass sie makellos, professionell und auf High-End-HR-Niveau sind. Verwende das korrekte Genus und die richtigen Artikel. Dies ist eine absolute Pflicht.
-7. Formuliere die Beschreibungen der Berufserfahrung (work highlights) STETS einheitlich in der Vergangenheitsform (Past Tense).
-8. WICHTIG ZUR VERMEIDUNG VON REDUNDANZ: Integriere berufliche Projekte IMMER direkt als 'highlights' in die jeweilige 'work' (Berufserfahrung) Station. Nutze das Array 'projects' NUR für private, eigenständige oder Open-Source-Projekte, die NICHT zu einer Festanstellung gehören. Vermeide strikt jegliche Doppelnennung von Inhalten zwischen 'work' und 'projects'.
-9. DATUMSFORMAT: Das Format 'MM.YYYY' (z.B. 06.2026) ist absolut korrekt. Übernimm diese Daten exakt so und betrachte sie niemals als Fehler.{extra_rule}
+9. GRAMMATIK: C2-Level Native Speaker Niveau. Makellos, professionell.{extra_rule}
 
 Zu analysierender Text:
 ---

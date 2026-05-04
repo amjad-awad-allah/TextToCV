@@ -44,12 +44,25 @@ for f in ["data.json", "cover_letter.json", "output/profile.jpg"]:
         except: pass
 
 # --- TABS ---
-tab1, tab2, tab3, tab4 = st.tabs([
+tabs_list = [
     "🔍 1. Extraction", 
     "✍️ 2. CV Editor", 
     "✉️ 3. Cover Letter", 
     "💾 4. Export & Download"
-])
+]
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("🔒 Private Area")
+private_password = st.sidebar.text_input("Amjad's Password:", type="password")
+if private_password == "amjad" or private_password == "amjad123":
+    tabs_list.append("💎 5. Amjad's Private CV")
+
+tab_objects = st.tabs(tabs_list)
+tab1 = tab_objects[0]
+tab2 = tab_objects[1]
+tab3 = tab_objects[2]
+tab4 = tab_objects[3]
+tab5 = tab_objects[4] if len(tab_objects) > 4 else None
 
 def run_with_animation(task_func, task_type="extract", lang="German"):
     progress_bar = st.progress(0)
@@ -461,3 +474,54 @@ with tab4:
                       st.download_button("⬇️ Download Application", data=f, file_name=os.path.basename(path), mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
                  if st.button("📂 Open Application", use_container_width=True, key="open_combo"):
                      os.startfile(os.path.abspath(path))
+
+# --- TAB 5: PRIVATE CV ---
+if tab5:
+    with tab5:
+        st.header("💎 Amjad's Private CV Translation & Formatting")
+        st.markdown("This area is strictly customized for your CV located at `C:\\Users\\User\\Desktop\\praktikum\\Amjad Awad-Allah lebenslauf.docx`.")
+        
+        target_lang_private = st.radio("Select Translation Language:", ["Deutsch (German)", "English"], key="private_lang")
+        
+        if st.button("🚀 Load, Translate & Optimize My CV", type="primary", use_container_width=True):
+            if not api_key:
+                st.error("Please enter an API Key in the sidebar.")
+            else:
+                with st.spinner("Extracting text and hyperlinks from local DOCX..."):
+                    local_path = os.path.join("private", "Amjad_CV.docx")
+                    import file_utils
+                    if not os.path.exists(local_path):
+                        st.error(f"Private CV file not found at {local_path}. Please make sure it exists.")
+                    else:
+                        raw_cv_text = file_utils.extract_text_with_links_from_local(local_path)
+                    
+                    if raw_cv_text.startswith("Error") or raw_cv_text == "Unsupported local file format.":
+                        st.error(raw_cv_text)
+                    else:
+                        st.success("File read successfully! Now translating and structuring...")
+                        provider = 'openai' if api_provider == "OpenAI" else 'gemini'
+                        try:
+                            import text_analyzer
+                            extracted_data = run_with_animation(
+                                lambda: text_analyzer.analyze_cv_text(raw_cv_text, api_key, provider=provider, target_language=target_lang_private),
+                                task_type="extract",
+                                lang=target_lang_private
+                            )
+                            
+                            if extracted_data:
+                                st.session_state['cv_data'] = extracted_data
+                                st.success("✅ CV Successfully Translated & Structured! The data is now available in Tab 2 and Tab 4.")
+                                
+                                import time, uuid, os, cv_generator
+                                ts = time.strftime("%Y%m%d_%H%M%S") + "_" + uuid.uuid4().hex[:6]
+                                fname = f"output/Amjad_CV_{'DE' if 'Deutsch' in target_lang_private else 'EN'}_{ts}.docx"
+                                cv_generator.generate_cv(extracted_data, fname)
+                                
+                                with open(fname, "rb") as f:
+                                    st.download_button("⬇️ Download Translated CV", data=f, file_name=os.path.basename(fname), mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
+                                if st.button("📂 Open Translated CV", use_container_width=True, key="open_private_cv"):
+                                    os.startfile(os.path.abspath(fname))
+                            else:
+                                st.error("Error during extraction.")
+                        except Exception as e:
+                            st.error(f"❌ API Error: {str(e)}")
