@@ -1,0 +1,11 @@
+services:
+  web:
+    build: .
+    container_name: text-to-cv-app
+    ports:
+      - "8502:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./output:/app/output
+    restart: unless-stopped

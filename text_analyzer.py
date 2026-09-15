@@ -226,7 +226,7 @@ Hier ist der aktuelle Lebenslauf eines Kandidaten (Base CV) und hier sind neue I
 
 Deine Aufgabe:
 1. Aktualisiere den Lebenslauf des Kandidaten, indem du die neuen Informationen sinnvoll integrierst.
-2. Behalte die grundlegende Struktur و المهارات و الروابط من السيرة الذاتية الأساسية.
+2. Behalte die grundlegende Struktur, die Fähigkeiten und die Links aus dem Basis-Lebenslauf bei.
 3. Verbessere die Formulierungen auf Premium-Niveau (C2 Native Speaker).
 4. Sorge dafür, dass KEINE Redundanz entsteht.
 5. Das Ergebnis muss ein valides JSON im JSON Resume Format sein.
