@@ -28,7 +28,7 @@ Ensure you have **Python 3.10+** installed.
 
 ### 2. Clone the Repository
 ```bash
-git clone https://github.com/your-username/TextToCV.git
+git clone https://github.com/amjad-awad-allah/TextToCV.git
 cd TextToCV
 ```
 
